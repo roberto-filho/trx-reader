@@ -4,7 +4,7 @@
   "description": "Reads bank (banco inter) transactions",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha \"**/**/*.mocha.js\""
   },
   "repository": {
     "type": "git",
@@ -18,7 +18,9 @@
   "homepage": "https://github.com/roberto-filho/dotfiles#readme",
   "dependencies": {
     "csv-reader": "~1.0.1",
-    "elasticlunr": "~0.9.5"
+    "elasticlunr": "~0.9.5",
+    "mongodb": "~3.0.5",
+    "promise.prototype.finally": "~3.1.0"
   },
   "devDependencies": {
     "chai-as-promised": "~7.1.1",

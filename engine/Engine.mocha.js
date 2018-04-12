@@ -1,11 +1,10 @@
-const assert = require('assert');
 const expect = require('chai')
-    .use(require('chai-json-schema'))
+    // .use(require('chai-json-schema'))
     .use(require('chai-as-promised'))
     .expect;
 
-const BankTransactionReader = require('../engine/BankTransactionReader');
-const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
+const BankTransactionReader = require('./BankTransactionReader');
+const BankTransactionCategorizer = require('./BankTransactionCategorizer');
 
 const mockTransactionRow = [
     1,
