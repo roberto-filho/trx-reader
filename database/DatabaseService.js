@@ -53,6 +53,19 @@ class DatabaseService {
       .catch(console.error);
   }
 
+  static deleteAllCategories() {
+    let connection;
+    return this.connect()
+      .then(client => connection = client)
+      .then(client => this.connectToDb(client))
+      .then(db => db.collection('categories'))
+      .then(collection => {
+        const promisedDelete = collection.deleteMany({});
+        return promisedDelete.then(connection.close());
+      })
+      .catch(console.error);
+  }
+
 }
 
 module.exports = DatabaseService;
