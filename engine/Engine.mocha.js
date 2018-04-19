@@ -37,8 +37,8 @@ describe('BankTransactionReader', () => {
         const promisedTransactions = new BankTransactionReader().readFile('Extrato.csv', 'utf8');
 
         it('should return a valid value', () => {
-            expect(promisedTransactions, 'returned null or undefined transactions object').to.eventually.not.be.null.and.not.be.undefined;
-            expect(promisedTransactions, 'returned no transactions').to.eventually.have.length.at.least(1);
+            return expect(promisedTransactions, 'returned null or undefined transactions object').to.eventually.not.be.null.and.not.be.undefined;
+            return expect(promisedTransactions, 'returned no transactions').to.eventually.have.length.at.least(1);
         });
     });
 
@@ -48,11 +48,11 @@ describe('BankTransactionReader', () => {
         const trxObject = instance._toTransactionObject(mockTransactionRow);
 
         it('should return a transaction object', () => {
-            expect(trxObject.index, 'index is incorrect').to.be.eq(mockTransactionRow[0]);
-            expect(trxObject.date, 'date is incorrect').to.be.eq(mockTransactionRow[1]);
-            expect(trxObject.description, 'description is incorrect').to.be.eq(mockTransactionRow[2]);
-            expect(trxObject.value, 'value is incorrect').to.be.eq(mockTransactionRow[3]);
-            expect(trxObject.balance, 'balance is incorrect').to.be.eq(mockTransactionRow[4]);
+            return expect(trxObject.index, 'index is incorrect').to.be.eq(mockTransactionRow[0]);
+            return expect(trxObject.date, 'date is incorrect').to.be.eq(mockTransactionRow[1]);
+            return expect(trxObject.description, 'description is incorrect').to.be.eq(mockTransactionRow[2]);
+            return expect(trxObject.value, 'value is incorrect').to.be.eq(mockTransactionRow[3]);
+            return expect(trxObject.balance, 'balance is incorrect').to.be.eq(mockTransactionRow[4]);
         });
     });
 });
@@ -69,11 +69,11 @@ describe('BankTransactionCategorizer', () => {
             const categorizedTransaction = categorizer.categorize([mockTransactionRowWithBarAndRestauranteInDescription], categories);
 
             it('should return an empty object with no categories', () => {
-                expect(emptyCategorizedTransaction).to.be.an('object').and.be.empty;
+                return expect(emptyCategorizedTransaction).to.be.an('object').and.be.empty;
             });
 
             it('should return an objet with one category', () => {
-                expect(categorizedTransaction).to.be.an('object').and.have.property('1').with.lengthOf(1);
+                return expect(categorizedTransaction).to.be.an('object').and.have.property('1').with.lengthOf(1);
             });
         });
 
@@ -85,24 +85,13 @@ describe('BankTransactionCategorizer', () => {
             const categorizedTransactions = categorizer.categorize([], categories);
 
             it('should return a valid value', () => {
-                expect(categorizedTransactions).to.not.be.null.and.not.be.undefined;
+                return expect(categorizedTransactions).to.not.be.null.and.not.be.undefined;
             });
     
             it('should return an empty object if no transactions were entered', () => {
-                expect(categorizedTransactions).to.be.empty;
+                return expect(categorizedTransactions).to.be.empty;
             });
         })
     });
 
 });
-
-/* JUST FOR REFERENCE
-describe('Array', function () {
-
-    describe('#indexOf()', () => {
-        it('should return -1 when the value is not present', () => {
-            assert.equal([1, 2, 3].indexOf(4), -1);
-        });
-    });
-});
-*/

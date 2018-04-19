@@ -26,10 +26,10 @@ class DatabaseService {
       });
     });
 
-    return clientPromise.then(client => {
+    return clientPromise/* .then(client => {
       console.log("Connected successfully to server");
       return client;
-    });
+    }) */;
   }
 
   static connectToDb(client) {
@@ -47,10 +47,17 @@ class DatabaseService {
       .then(client => this.connectToDb(client))
       .then(db => db.collection('categories'))
       .then(collection => {
-        const insertedCategory = collection.insert(category);
-        return insertedCategory.then(connection.close());
-      })
-      .catch(console.error);
+        // Check if a category with this id already exists
+        return collection.findOne({id: category.id})
+          .then((categoryFound) => {
+            if (categoryFound) {
+              connection.close();
+              return Promise.reject(`Category with id [${category.id}] already exists.`);
+            }
+            const insertedCategory = collection.insert(category);
+            return insertedCategory.then(connection.close());
+          });
+      });
   }
 
   static deleteAllCategories() {
