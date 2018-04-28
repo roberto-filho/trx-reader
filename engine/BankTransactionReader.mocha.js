@@ -17,7 +17,7 @@ describe('BankTransactionReader', () => {
 
     describe('#readFile', () => {
 
-        const promisedTransactions = new BankTransactionReader().readFile('Extrato.csv', 'utf8');
+        const promisedTransactions = new BankTransactionReader().readFile('test/Extrato.csv', 'utf8');
 
         it('should return a valid value', () => {
             return expect(promisedTransactions, 'returned null or undefined transactions object').to.eventually.not.be.null.and.not.be.undefined;

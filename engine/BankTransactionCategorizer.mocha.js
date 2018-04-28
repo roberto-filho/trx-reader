@@ -24,7 +24,7 @@ const mockTransactionRowWithBarAndRestauranteInDescription = {
 describe('BankTransactionCategorizer', () => {
 
     describe('#categorize', () => {
-        const categories = JSON.parse(require('fs').readFileSync('test-categories.json', 'utf8'));
+        const categories = JSON.parse(require('fs').readFileSync('test/test-categories.json', 'utf8'));
 
         const categorizer = new BankTransactionCategorizer();
 
