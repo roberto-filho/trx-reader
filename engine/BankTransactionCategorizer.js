@@ -26,25 +26,29 @@ class BankTransactionCategorizer {
      */
 	categorize(transactions, categories = {}) {
         
-        const categorizedTransactions = {};
+        const categoryMap = {};
         
         transactions.forEach(trx => {
             const trxCategory = this._categorizeOne(trx, categories);
             if (Object.keys(trxCategory).length !== 0) {
                 // Check if it exists
-                const existingTransactions = categorizedTransactions[trxCategory.id];
+                const existingCategory = categoryMap[trxCategory.id];
                 
-                if (existingTransactions) {
+                if (existingCategory) {
                     // If one or more transactions already exist, just push
-                    existingTransactions.push(trx);
+                    existingCategory.transactions.push(trx);
                 } else {
                     // If not, create it
-                    categorizedTransactions[trxCategory.id] = [trx];
+                    categoryMap[trxCategory.id] = {
+                        ...trxCategory,
+                        transactions: [trx]
+                    };
                 }
             }
         });
         
-		return categorizedTransactions;
+        // Transform the categories into an array
+        return Object.keys(categoryMap).map(categoryId => categoryMap[categoryId]);
     }
 
     _categorizeOne(transaction, categories) {

@@ -32,12 +32,25 @@ describe('BankTransactionCategorizer', () => {
             const emptyCategorizedTransaction = categorizer.categorize([mockTransactionRowWithBarDescription], categories);
             const categorizedTransaction = categorizer.categorize([mockTransactionRowWithBarAndRestauranteInDescription], categories);
 
-            it('should return an empty object with no categories', () => {
-                return expect(emptyCategorizedTransaction).to.be.an('object').and.be.empty;
+            it('should return an empty array with no categories', () => {
+                return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;
             });
 
-            it('should return an objet with one category', () => {
-                return expect(categorizedTransaction).to.be.an('object').and.have.property('1').with.lengthOf(1);
+            describe('with one category', function () {
+                it('should return an array with one category', () => {
+                    return expect(categorizedTransaction).to.be.an('array').with.lengthOf(1);
+                });
+
+                const category = categorizedTransaction[0];
+
+                describe('inspect the category', function () {
+                    it('should have a transactions object', async () => {
+                        return expect(category).to.have.property('transactions').with.lengthOf(1);
+                    });
+                    it('should have an id', async () => {
+                        return expect(category).to.have.property('id');
+                    })
+                })
             });
         });
 
