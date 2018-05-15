@@ -49,13 +49,26 @@ class DatabaseService {
       .then(collection => {
         // Check if a category with this id already exists
         return collection.findOne({id: category.id})
-          .then((categoryFound) => {
+          .then(categoryFound => {
+
             if (categoryFound) {
               connection.close();
               return Promise.reject(`Category with id [${category.id}] already exists.`);
             }
-            const insertedCategory = collection.insert(category);
-            return insertedCategory.then(connection.close());
+
+            // Check if category with the same description exists
+            return collection.find({ description: new RegExp(category.description, 'i') })
+              .toArray()
+              .then(catWithSameDescription => {
+                
+                if (catWithSameDescription.length > 0) {
+                  connection.close();
+                  return Promise.reject(`Category with description [${category.description}] already exists.`);
+                }
+
+                const insertedCategory = collection.insert(category);
+                return insertedCategory.then(connection.close());
+              });
           });
       });
   }

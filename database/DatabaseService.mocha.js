@@ -44,6 +44,19 @@ describe('DatabaseService', function () {
       
       return expect(writeTwoCategories, 'allowed to write two categories with same id').to.eventually.be.rejected;
     });
+
+    it('should not allow to insert 2 categories with the same description', async () => {
+      const firstCategory = newTestCategory();
+      firstCategory.id = 1;
+      const secondCategory = newTestCategory();
+      // Change the id, keep the same description
+      secondCategory.id = 2;
+
+      const writeTwoCategories = DatabaseService.insertCategory(firstCategory)
+        .then(res => DatabaseService.insertCategory( secondCategory ))
+      
+      return expect(writeTwoCategories, 'allowed to write two categories with same description').to.eventually.be.rejected;
+    })
   });
 
   describe('#deleteAllCategories', function () {
