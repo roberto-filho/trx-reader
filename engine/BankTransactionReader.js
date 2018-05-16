@@ -13,11 +13,21 @@ class BankTransactionReader {
   * @returns {Promise.<Object[], Error>}
   */
 	readFile(filename, charset = 'utf8') {
-    
-		const CsvReadableStream = require('csv-reader');
-		
 		var inputStream = this.fs.createReadStream(filename, charset);
     
+		return this.read(inputStream);
+  }
+
+  /**
+   * Reads a generic stream into an array of transaction objects.
+   * @param {ReadableStream} stream the stream from which to read
+   * 
+   * @returns {Promise.<Object[], Error>}
+   */
+  read(stream) {
+
+    const CsvReadableStream = require('csv-reader');
+		
     const readOptions = { delimiter: ';', skipEmptyLines: true, trim: true };
     
     const reader = CsvReadableStream(readOptions);
@@ -26,11 +36,12 @@ class BankTransactionReader {
       let rowIndex = 0;
       const rows = [];
       
-      inputStream
+      stream
         .pipe(reader)
         .on('error', reject)
         .on('data', row => {
           rowIndex++;
+          // Skip first five rows, they're bogus
           if (rowIndex > 5) {
             // Create a row index
             rows.push(this._toTransactionObject([rowIndex-5].concat(row)));

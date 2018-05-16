@@ -45,7 +45,7 @@ describe('DatabaseService', function () {
       return expect(writeTwoCategories, 'allowed to write two categories with same id').to.eventually.be.rejected;
     });
 
-    it('should not allow to insert 2 categories with the same description', async () => {
+    it('should not allow to insert 2 categories with the same description (ignoring case)', async () => {
       const firstCategory = newTestCategory();
       firstCategory.id = 1;
       const secondCategory = newTestCategory();
