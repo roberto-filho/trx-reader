@@ -4,7 +4,8 @@
   "description": "Reads bank (banco inter) transactions",
   "main": "index.js",
   "scripts": {
-    "test": "mocha \"**/**/*.mocha.js\""
+    "test": "mocha \"**/**/*.mocha.js\"",
+    "start": "node startServer.js"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,8 @@
   "dependencies": {
     "csv-reader": "~1.0.1",
     "elasticlunr": "~0.9.5",
+    "express": "~4.16.3",
+    "express-busboy": "~7.0.0",
     "mongodb": "~3.0.5",
     "promise.prototype.finally": "~3.1.0"
   },
