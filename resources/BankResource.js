@@ -38,7 +38,7 @@ class BankResource {
       trxReader.readFile(firstFilePath)
         .then(transactions => {
           // Delete file after done with it
-          fs.unlink(firstFilePath.file, (err) => {
+          fs.unlink(firstFilePath, (err) => {
             if (err) {
               console.error(`Error deleting file [${firstFilePath}]: ${err}`);
             }
