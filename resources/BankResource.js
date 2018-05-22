@@ -4,10 +4,10 @@ class BankResource {
 
   registerPaths(express) {
     // Express busboy for parsing uploads.
-    var bb = require('express-busboy');
-    bb.extend(express, {
+    var expBusboy = require('express-busboy');
+    expBusboy.extend(express, {
       upload: true,
-      allowedPath: (url) => url == '/api/bank/upload'
+      allowedPath: /^\/api\/bank\/upload$/
     });
 
     express.post('/api/bank/upload', this.uploadFile);
@@ -29,10 +29,21 @@ class BankResource {
       res.status(422).json({error: 'No file to upload.'}).end();
     } else {
       // Parse only first file
-      const firstFile = Object.keys(req.files)[0];
+      const firstFileKey = Object.keys(req.files)[0];
+      const firstFile = req.files[firstFileKey];
+      const firstFilePath = firstFile.file;
 
-      trxReader.readFile(req.files[firstFile].file)
+      console.log(`Handling request file: ${firstFilePath}`);
+      
+      trxReader.readFile(firstFilePath)
         .then(transactions => {
+          // Delete file after done with it
+          fs.unlink(firstFilePath.file, (err) => {
+            if (err) {
+              console.error(`Error deleting file [${firstFilePath}]: ${err}`);
+            }
+          });
+
           res.json(transactions).end();
         })
         .catch((err) => {
