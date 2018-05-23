@@ -3,14 +3,18 @@ const fs = require('fs');
 class BankResource {
 
   registerPaths(express) {
+    this.setupBusboy(express);
+
+    express.post('/api/bank/upload', this.uploadFile);
+  }
+
+  setupBusboy(expressApp) {
     // Express busboy for parsing uploads.
     var expBusboy = require('express-busboy');
-    expBusboy.extend(express, {
+    expBusboy.extend(expressApp, {
       upload: true,
       allowedPath: /^\/api\/bank\/upload$/
     });
-
-    express.post('/api/bank/upload', this.uploadFile);
   }
 
   /**
