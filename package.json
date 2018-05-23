@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/roberto-filho/dotfiles#readme",
   "dependencies": {
+    "cors": "~2.8.4",
     "csv-reader": "~1.0.1",
     "elasticlunr": "~0.9.5",
     "express": "~4.16.3",
