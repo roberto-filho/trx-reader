@@ -6,8 +6,8 @@ const dbName = 'bank';
 
 const MongoClient = require('mongodb').MongoClient;
 
-const promiseFinally = require('promise.prototype.finally');
-promiseFinally.shim();
+// const promiseFinally = require('promise.prototype.finally');
+// promiseFinally.shim();
 
 class DatabaseService {
 

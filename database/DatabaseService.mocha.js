@@ -31,7 +31,7 @@ describe('DatabaseService', function () {
   });
 
   describe('#insertCategory', function () {
-    it('should insert a category', () => {
+    it('should insert a category and return the id', () => {
       const promisedInserted = DatabaseService.insertCategory(newTestCategory());
       promisedInserted.catch((err) => assert.fail());
 
