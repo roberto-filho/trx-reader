@@ -5,7 +5,6 @@ class BankResource {
   registerPaths(express) {
     this._setupBusboy(express);
 
-    this.uploadFile.bind(this);
     express.post('/api/bank/upload', this.uploadFile);
   }
 
