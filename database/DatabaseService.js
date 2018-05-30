@@ -98,6 +98,24 @@ class DatabaseService {
       .catch(console.error);
   }
 
+  /**
+   * Inserts an object in a collection. Runs no validations.
+   * @param {string} collectionName the collection to insert the object into
+   * @param {object} objectToInsert the object to insert in the collection
+   */
+  static insertObject(collectionName, objectToInsert) {
+    let connection;
+    return this.connect()
+      .then(client => connection = client)
+      .then(client => this.connectToDb(client))
+      .then(db => db.collection(collectionName))
+      .then(databaseCollection => {
+        // TODO Check if the period has already been uploaded for that account
+        const databaseResult = databaseCollection.insert(objectToInsert);
+        return databaseResult.then(connection.close());
+      })
+      .catch((err) => connection.close());
+  }
 }
 
 module.exports = DatabaseService;

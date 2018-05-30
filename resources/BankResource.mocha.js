@@ -6,13 +6,15 @@ const fs = require('fs');
 
 const BankResource = require('./BankResource');
 
+const TEST_EXTRATO_FILE_PATH = 'test/Extrato-2018-04.csv';
+
 describe('BankResource', function () {
 
-  describe('#_saveFileHeader', function () {
-    it('should return something', () => {
-      const bankResource = new BankResource();
+  const bankResource = new BankResource();
 
-      const promisedHeader = bankResource._getFileHeader('test/Extrato-2018-04.csv');
+  describe('#_getFileHeader', function () {
+    it('should return something', () => {
+      const promisedHeader = bankResource._getFileHeader(TEST_EXTRATO_FILE_PATH);
 
       promisedHeader.catch((err) => assert.fail(err));
 
@@ -24,5 +26,11 @@ describe('BankResource', function () {
         });
     });
   });
+
+  describe('should save a file header', function () {
+    const fileHeaderPromise = bankResource._saveFileHeader(TEST_EXTRATO_FILE_PATH);
+
+    return expect(fileHeaderPromise).to.eventually.be.fulfilled;
+  })
 
 });
