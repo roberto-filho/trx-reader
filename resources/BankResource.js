@@ -5,6 +5,10 @@ class BankResource {
   registerPaths(express) {
     this._setupBusboy(express);
 
+    // We need to bind this function to allow it to use the other methods in this class
+    // using "this"
+    this.uploadFile = this.uploadFile.bind(this);
+
     express.post('/api/bank/upload', this.uploadFile);
   }
 
