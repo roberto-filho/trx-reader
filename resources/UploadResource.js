@@ -3,22 +3,11 @@ const fs = require('fs');
 module.exports = class BankResource {
 
   registerPaths(express) {
-    this._setupBusboy(express);
-
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
     this.uploadFile = this.uploadFile.bind(this);
 
     express.post('/api/bank/upload', this.uploadFile);
-  }
-
-  _setupBusboy(expressApp) {
-    // Express busboy for parsing uploads.
-    var expBusboy = require('express-busboy');
-    expBusboy.extend(expressApp, {
-      upload: true,
-      allowedPath: /^\/api\/bank\/upload$/
-    });
   }
 
   /**
