@@ -1,4 +1,5 @@
-const BankResource = require('./resources/BankResource');
+const UploadResource = require('./resources/UploadResource');
+const BusboyConfigurator = require('./conf/BusboyConfigurator');
 
 const express = require('express');
 const app = express();
@@ -16,9 +17,15 @@ var corsOptions = {
 
 app.use(cors(corsOptions));
 
-const resource = new BankResource();
+const resource = new UploadResource();
 
 // Call the register paths
 resource.registerPaths(app);
+
+const configurator = new BusboyConfigurator();
+
+// Register busboy for paths
+configurator.addUploadPath('/api/bank/upload');
+configurator.configure(app);
 
 app.listen(port, () => console.log(`App listening on port ${port}!`));
