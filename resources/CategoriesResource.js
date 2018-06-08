@@ -20,7 +20,7 @@ module.exports = class CategoriesResource {
   }
 
   listCategories (req, res) {
-    return DatabaseService.listAllCategories()
+    DatabaseService.listAllCategories()
       .then(categories => {
         res.status(200).json(categories);
       })
@@ -31,7 +31,7 @@ module.exports = class CategoriesResource {
 
   createCategory (req, res) {
     if (req.is('application/json')) {
-      return DatabaseService.insertCategory(req.body)
+      DatabaseService.insertCategory(req.body)
         .then(inserted => {
           res.status(201)
             .json(/* {id: inserted.ops[0]._id} */inserted)
@@ -41,12 +41,14 @@ module.exports = class CategoriesResource {
           res.status(500).json(err).end();
         });
     } else {
-      res.status(400).json({error: 'No json provided.'});
+      res.status(400)
+        .json({error: 'No json provided.'})
+        .end();
     }
   }
 
   deleteAllCategories (req, res) {
-    return DatabaseService.deleteAllCategories()
+    DatabaseService.deleteAllCategories()
       .then(deleted => {
         res.status(200).json(deleted).end();
       })
