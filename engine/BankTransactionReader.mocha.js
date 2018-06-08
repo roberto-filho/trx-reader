@@ -21,8 +21,11 @@ describe('BankTransactionReader', () => {
     
     it('should return a valid value', () => {
       return expect(promisedTransactions, 'returned null or undefined transactions object').to.eventually.not.be.null.and.not.be.undefined;
-      return expect(promisedTransactions, 'returned no transactions').to.eventually.have.length.at.least(1);
     });
+    
+    it('should return at least one element', async () => {
+      return expect(promisedTransactions, 'returned no transactions').to.eventually.have.length.at.least(1);
+    })
   });
   
   describe('#_toTransactionObject', () => {

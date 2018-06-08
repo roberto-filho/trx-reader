@@ -4,13 +4,13 @@ const expect = require('chai')
     .expect;
 const fs = require('fs');
 
-const BankResource = require('./BankResource');
+const UploadResource = require('./UploadResource');
 
 const TEST_EXTRATO_FILE_PATH = 'test/Extrato-2018-04.csv';
 
 describe('BankResource', function () {
 
-  const bankResource = new BankResource();
+  const bankResource = new UploadResource();
 
   describe('#_getFileHeader', function () {
     it('should return something', () => {
