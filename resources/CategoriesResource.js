@@ -1,17 +1,62 @@
 const fs = require('fs');
 
+const DatabaseService = require('../database/DatabaseService');
+
 module.exports = class CategoriesResource {
 
   registerPaths(express) {
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
     this.uploadFile = this.categorize.bind(this);
+    this.listCategories = this.listCategories.bind(this);
+    this.createCategory = this.createCategory.bind(this);
+    this.deleteAllCategories = this.deleteAllCategories.bind(this);
 
     express.post('/api/bank/categorize', this.categorize);
+    
+    express.post('/api/bank/categories', this.createCategory);
+    express.get('/api/bank/categories', this.listCategories);
+    express.delete('/api/bank/categories', this.deleteAllCategories);
+  }
+
+  listCategories (req, res) {
+    return DatabaseService.listAllCategories()
+      .then(categories => {
+        res.status(200).json(categories);
+      })
+      .catch(err => {
+        res.status(500).json(err).end();
+      });
+  }
+
+  createCategory (req, res) {
+    if (req.is('application/json')) {
+      return DatabaseService.insertCategory(req.body)
+        .then(inserted => {
+          res.status(201)
+            .json(/* {id: inserted.ops[0]._id} */inserted)
+            .end();
+        })
+        .catch(err => {
+          res.status(500).json(err).end();
+        });
+    } else {
+      res.status(400).json({error: 'No json provided.'});
+    }
+  }
+
+  deleteAllCategories (req, res) {
+    return DatabaseService.deleteAllCategories()
+      .then(deleted => {
+        res.status(200).json(deleted).end();
+      })
+      .catch(err => {
+        res.status(500).json(err).end();
+      });
   }
 
   /**
-   * Upload a file
+   * Categorizes a file.
    * @param {object} request the request
    * @param {object} response the response
    */
@@ -40,8 +85,6 @@ module.exports = class CategoriesResource {
               console.error(`Error deleting file [${firstFilePath}]: ${err}`);
             }
           });
-
-          const DatabaseService = require('../database/DatabaseService');
 
           DatabaseService.listAllCategories()
             .then((categories) => {
