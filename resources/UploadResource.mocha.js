@@ -5,6 +5,7 @@ const expect = require('chai')
 const fs = require('fs');
 
 const UploadResource = require('./UploadResource');
+const DatabaseService = require('../database/DatabaseService');
 
 const TEST_EXTRATO_FILE_PATH = 'test/Extrato-2018-04.csv';
 
@@ -27,10 +28,18 @@ describe('BankResource', function () {
     });
   });
 
-  describe('should save a file header', function () {
+  describe('#_saveFileHeader', function () {
     const fileHeaderPromise = bankResource._saveFileHeader(TEST_EXTRATO_FILE_PATH);
 
-    return expect(fileHeaderPromise).to.eventually.be.fulfilled;
-  })
+    it('should save a file header', async () => {
+      return expect(fileHeaderPromise).to.eventually.be.fulfilled;
+    });
+    
+    after(async () => {
+      // Clear the database of file headers
+      await DatabaseService.deleteAllFileHeaders();
+    });
+  });
+  
 
 });

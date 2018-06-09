@@ -103,7 +103,7 @@ module.exports = class BankResource {
       })
       .on('close', function () {
         if(lineNumber < 5) {
-          reject('Did not reach end of header.');
+          reject(new Error('Did not reach end of header.'));
         } else {
           // Everything ok
           resolve(headerInfo);

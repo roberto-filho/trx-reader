@@ -66,4 +66,12 @@ describe('DatabaseService', function () {
       return expect(promisedDelete, 'did not delete all categories').to.eventually.have.property('deletedCount');
     });
   });
+
+  describe('#deleteAllFileHeaders', function () {
+    it('should delete all file headers', async () => {
+      const deletionPromise = DatabaseService.deleteAllFileHeaders();
+      
+      return expect(deletionPromise, 'did not delete all categories').to.eventually.have.property('deletedCount');
+    });
+  })
 });

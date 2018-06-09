@@ -53,7 +53,7 @@ class DatabaseService {
 
             if (categoryFound) {
               connection.close();
-              return Promise.reject(`Category with id [${category.id}] already exists.`);
+              return Promise.reject(new Error(`Category with id [${category.id}] already exists.`));
             }
 
             // Check if category with the same description exists
@@ -63,7 +63,7 @@ class DatabaseService {
                 
                 if (catWithSameDescription.length > 0) {
                   connection.close();
-                  return Promise.reject(`Category with description [${category.description}] already exists.`);
+                  return Promise.reject(new Error(`Category with description [${category.description}] already exists.`));
                 }
 
                 const insertedCategory = collection.insert(category);
@@ -84,18 +84,26 @@ class DatabaseService {
       })
       .catch(console.error);
   }
-
-  static deleteAllCategories() {
+  
+  static deleteAll (collectionName) {
     let connection;
     return this.connect()
-      .then(client => connection = client)
-      .then(client => this.connectToDb(client))
-      .then(db => db.collection('categories'))
-      .then(collection => {
-        const promisedDelete = collection.deleteMany({});
-        return promisedDelete.then(connection.close());
-      })
-      .catch(console.error);
+    .then(client => connection = client)
+    .then(client => this.connectToDb(client))
+    .then(db => db.collection(collectionName))
+    .then(collection => {
+      const promisedDelete = collection.deleteMany({});
+      return promisedDelete.then(connection.close());
+    })
+    .catch(console.error);
+  }
+  
+  static deleteAllCategories() {
+    return this.deleteAll('categories');
+  }
+
+  static deleteAllFileHeaders () {
+    return this.deleteAll('uploadedHeaders');
   }
 
   /**
