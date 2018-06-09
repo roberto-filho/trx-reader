@@ -14,5 +14,9 @@ describe('BankTransactionProcessor', () => {
     it('should return something', () => {
       return expect(promisedTransactions, 'returned null or undefined').to.eventually.not.be.null.and.not.be.undefined;
     });
+
+    it('should return no categories', async () => {
+      
+    })
   });
 });

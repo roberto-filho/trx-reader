@@ -111,7 +111,7 @@ class DatabaseService {
    * @param {string} collectionName the collection to insert the object into
    * @param {object} objectToInsert the object to insert in the collection
    */
-  static insertObject(collectionName, objectToInsert) {
+  static insert(collectionName, objectToInsert) {
     let connection;
     return this.connect()
       .then(client => connection = client)

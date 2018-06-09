@@ -72,7 +72,7 @@ module.exports = class BankResource {
         // Save header to database
         // console.log(JSON.stringify(header));
         const DatabaseService = require('../database/DatabaseService');
-        return DatabaseService.insertObject('uploadedHeaders', header);
+        return DatabaseService.insert('uploadedHeaders', header);
       });
   }
 
