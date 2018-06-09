@@ -4,18 +4,19 @@ const expect = require('chai')
     .expect;
 const fs = require('fs');
 
-const UploadResource = require('./UploadResource');
+const BankFileHeaderReader = require('./BankFileHeaderReader');
 const DatabaseService = require('../database/DatabaseService');
+const UploadResource = require('../resources/UploadResource');
 
 const TEST_EXTRATO_FILE_PATH = 'test/Extrato-2018-04.csv';
 
-describe('BankResource', function () {
+describe('BankFileHeaderReader', function () {
 
-  const bankResource = new UploadResource();
+  const headerReader = new BankFileHeaderReader();
 
   describe('#_getFileHeader', function () {
     it('should return something', () => {
-      const promisedHeader = bankResource._getFileHeader(TEST_EXTRATO_FILE_PATH);
+      const promisedHeader = headerReader.readFileHeader(TEST_EXTRATO_FILE_PATH);
 
       promisedHeader.catch((err) => assert.fail(err));
 
@@ -29,7 +30,7 @@ describe('BankResource', function () {
   });
 
   describe('#_saveFileHeader', function () {
-    const fileHeaderPromise = bankResource._saveFileHeader(TEST_EXTRATO_FILE_PATH);
+    const fileHeaderPromise = new UploadResource()._saveFileHeader(TEST_EXTRATO_FILE_PATH);
 
     it('should save a file header', async () => {
       return expect(fileHeaderPromise).to.eventually.be.fulfilled;
