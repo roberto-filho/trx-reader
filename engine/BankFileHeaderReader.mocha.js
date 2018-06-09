@@ -15,11 +15,16 @@ describe('BankFileHeaderReader', function () {
   const headerReader = new BankFileHeaderReader();
 
   describe('#_getFileHeader', function () {
+    const promisedHeader = headerReader.readFileHeader(TEST_EXTRATO_FILE_PATH);
+
+    promisedHeader.catch((err) => assert.fail(err));
+
     it('should return something', () => {
-      const promisedHeader = headerReader.readFileHeader(TEST_EXTRATO_FILE_PATH);
+      return expect(promisedHeader, 'did not return an empty object')
+        .to.eventually.not.be.null.and.not.be.undefined;
+    });
 
-      promisedHeader.catch((err) => assert.fail(err));
-
+    it('should read a header', () => {
       return expect(promisedHeader, 'did not return an empty object')
         .to.eventually.be.eql({
           accountNumber: '10873740',
@@ -28,6 +33,10 @@ describe('BankFileHeaderReader', function () {
         });
     });
   });
+
+});
+
+describe('UploadResource', function () {
 
   describe('#_saveFileHeader', function () {
     const fileHeaderPromise = new UploadResource()._saveFileHeader(TEST_EXTRATO_FILE_PATH);
@@ -41,6 +50,5 @@ describe('BankFileHeaderReader', function () {
       await DatabaseService.deleteAllFileHeaders();
     });
   });
-  
 
-});
+})
