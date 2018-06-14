@@ -6,7 +6,7 @@ const UploadResource = require('../resources/UploadResource');
 
 const reader = new BankTransactionReader();
 
-class BankTransactionProcessor {
+module.exports = class BankTransactionProcessor {
   constructor () {
     
   }
@@ -45,5 +45,3 @@ class BankTransactionProcessor {
   }
 
 }
-
-module.exports = BankTransactionProcessor
