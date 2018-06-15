@@ -72,7 +72,14 @@ class BankTransactionCategorizer {
     }
 
     // Configure our document index
-    const index = this._createTransactionIndex(transaction);
+    // Configure our document index
+    const index = new this.elasticlunr(function () {
+      this.addField('description');
+      this.setRef('index');
+    });
+    
+    // Add our tuple
+    index.addDoc(transaction);
 
     const categorizationFunction = returnMany
       ? this._categorizeOneAndReturnManyCategories
@@ -187,19 +194,6 @@ class BankTransactionCategorizer {
     return false;
   }
   
-  _createTransactionIndex(transaction) {
-    // Configure our document index
-    const index = new this.elasticlunr(function () {
-      this.addField('description');
-      this.setRef('index');
-    });
-    
-    // Add our tuple
-    index.addDoc(transaction);
-
-    return index;
-  }
-
   categorizeTransactions(transactions, categories) {
     return transactions.map((trx) => {
       
