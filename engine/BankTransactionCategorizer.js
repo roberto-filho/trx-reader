@@ -56,50 +56,30 @@ class BankTransactionCategorizer {
    * Categorizes one transaction, returning only the first match.
    * @param {Object} transaction the transaction object to be categorized
    * @param {Array} categories the categories to be used to categorize this transaction.
-   * @param {Boolean} [shouldReturnArray=false] if the method should return 
+   * @param {Boolean} [returnMany=false] if the method should return many category matches
    */
-  _categorizeOne(transaction, categories, shouldReturnArray = false) {
-    let categoryToBeReturned = {};
+  _categorizeOne(transaction, categories, returnMany = false) {
+    let emptyResult = returnMany ? [] : {};
     
     // First of all, sanity checks
     if (!categories) {
-      return shouldReturnArray ? [] : categoryToBeReturned;
+      return emptyResult;
     }
 
     if (!transaction.description) {
       // nothing to do, we categorized based on the description
-      return shouldReturnArray ? [] : categoryToBeReturned;
+      return emptyResult;
     }
 
     // Configure our document index
     const index = this._createTransactionIndex(transaction);
-    
-    // If we should return an array, detour to another method
-    if (shouldReturnArray) {
-      return this._categorizeOneAndReturnManyCategories(index, categories);
-    }
 
-    categories.some(categoryElement => {
-
-      let matchesPhrase = this._matchesAnyPhrase(index, categoryElement);
-      
-      if (matchesPhrase) {
-        // One phrase matched
-        categoryToBeReturned = categoryElement;
-        return true;
-      }
-      
-      if (this._matchesAnyKeyword(index, categoryElement)) {
-        // Found something
-        categoryToBeReturned = categoryElement;
-        return true;
-      }
-      
-      // No dice
-      return false;
-    });
+    const categorizationFunction = returnMany
+      ? this._categorizeOneAndReturnManyCategories
+      : this._categorizeOneAndReturnOneCategory;
     
-    return categoryToBeReturned;
+    // Choose which method to use
+    return categorizationFunction.call(this, index, categories);
   }
 
   _categorizeOneAndReturnManyCategories(index, categories) {
@@ -126,6 +106,32 @@ class BankTransactionCategorizer {
     });
 
     return categoriesToBeReturned;
+  }
+
+  _categorizeOneAndReturnOneCategory(index, categories) {
+    let categoryToBeReturned = {};
+
+    categories.some(categoryElement => {
+
+      let matchesPhrase = this._matchesAnyPhrase(index, categoryElement);
+      
+      if (matchesPhrase) {
+        // One phrase matched
+        categoryToBeReturned = categoryElement;
+        return true;
+      }
+      
+      if (this._matchesAnyKeyword(index, categoryElement)) {
+        // Found something
+        categoryToBeReturned = categoryElement;
+        return true;
+      }
+      
+      // No dice
+      return false;
+    });
+
+    return categoryToBeReturned;
   }
 
   /**
@@ -156,6 +162,13 @@ class BankTransactionCategorizer {
     return matchesPhrase;
   }
   
+  /**
+   * Checks if the transactions in the index match the category's keywords.
+   * @param {Object} transactionsIndex the elasticlunr index with the transaction(s)
+   * to be categorized.
+   * @param {Object} category the category to be checked
+   * @returns {Boolean} true if there was a match and false otherwise.
+   */
   _matchesAnyKeyword(transactionsIndex, category) {
     // should be an array of keywords
     if (!category.keywords) {
