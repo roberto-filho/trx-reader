@@ -59,114 +59,65 @@ class BankTransactionCategorizer {
    * @param {Boolean} [shouldReturnArray=false] if the method should return 
    */
   _categorizeOne(transaction, categories, shouldReturnArray = false) {
-    let category = {};
+    let categoryToBeReturned = {};
     
     // First of all, sanity checks
     if (!categories) {
-      return shouldReturnArray ? [] : category;
+      return shouldReturnArray ? [] : categoryToBeReturned;
     }
 
     if (!transaction.description) {
       // nothing to do, we categorized based on the description
-      return shouldReturnArray ? [] : category;
+      return shouldReturnArray ? [] : categoryToBeReturned;
     }
+
+    // Configure our document index
+    const index = this._createTransactionIndex(transaction);
     
     // If we should return an array, detour to another method
     if (shouldReturnArray) {
-      return this._categorizeOneAndReturnManyCategories(transaction, categories);
+      return this._categorizeOneAndReturnManyCategories(index, categories);
     }
 
-    categories.some(transactionCategory => {
-      // Configure our document index
-      const index = new this.elasticlunr(function () {
-        this.addField('description');
-        this.setRef('index');
-      });
+    categories.some(categoryElement => {
+
+      let matchesPhrase = this._matchesAnyPhrase(index, categoryElement);
       
-      // Add our tuple
-      index.addDoc(transaction);
-      
-      // should check if the category has phrases
-      if (transactionCategory.phrases) {
-        // Let's find out if it matches the whole phrase
-        let matchesPhrase = false;
-        
-        // Check if it matches any of the phrases configured
-        transactionCategory.phrases.forEach(phrase => {
-          const searchResult = index.search(phrase, DEFAULT_PHRASE_SEARCH_CONFIG);
-          // Did we find something
-          matchesPhrase = searchResult.length > 0;
-        });
-        
-        if (matchesPhrase) {
-          // One phrase matched
-          category = transactionCategory;
-          return true;
-        }
+      if (matchesPhrase) {
+        // One phrase matched
+        categoryToBeReturned = categoryElement;
+        return true;
       }
       
-      // should be an array of keywords
-      // should contain any of the keywords
-      if (transactionCategory.keywords) {
-        // Search our index
-        const searchResult = index.search(transactionCategory.keywords.join(' '), DEFAULT_KEYWORD_SEARCH_CONFIG);
-        
-        if (searchResult.length > 0) {
-          // Found something
-          category = transactionCategory;
-          return true;
-        }
+      if (this._matchesAnyKeyword(index, categoryElement)) {
+        // Found something
+        categoryToBeReturned = categoryElement;
+        return true;
       }
       
       // No dice
       return false;
     });
     
-    return category;
+    return categoryToBeReturned;
   }
 
-  _categorizeOneAndReturnManyCategories(transaction, categories) {
+  _categorizeOneAndReturnManyCategories(index, categories) {
     const categoriesToBeReturned = [];
     
     categories.forEach(transactionCategory => {
-      // Configure our document index
-      const index = new this.elasticlunr(function () {
-        this.addField('description');
-        this.setRef('index');
-      });
       
-      // Add our tuple
-      index.addDoc(transaction);
-      
-      let matchesPhrase = false;
-
-      // should check if the category has phrases
-      if (transactionCategory.phrases) {
-        // Let's find out if it matches the whole phrase
+      let matchesPhrase = this._matchesAnyPhrase(index, transactionCategory);
         
-        // Check if it matches any of the phrases configured
-        transactionCategory.phrases.forEach(phrase => {
-          const searchResult = index.search(phrase, DEFAULT_PHRASE_SEARCH_CONFIG);
-          // Did we find something
-          if (searchResult.length > 0 && !matchesPhrase) {
-            matchesPhrase = true;
-          }
-        });
-        
-        if (matchesPhrase) {
-          // One phrase matched
-          categoriesToBeReturned.push(transactionCategory);
-        }
+      if (matchesPhrase) {
+        // One phrase matched
+        categoriesToBeReturned.push(transactionCategory);
       }
       
-      // should be an array of keywords
-      // should contain any of the keywords
       // Only run this if a phrase has not been already matched
-      if (transactionCategory.keywords && !matchesPhrase) {
-        // Search our index
-        const searchResult = index.search(transactionCategory.keywords.join(' '), DEFAULT_KEYWORD_SEARCH_CONFIG);
-        
-        if (searchResult.length > 0) {
+      if (!matchesPhrase) {
+
+        if (this._matchesAnyKeyword(index, transactionCategory)) {
           // Found something
           categoriesToBeReturned.push(transactionCategory);
         }
@@ -175,6 +126,65 @@ class BankTransactionCategorizer {
     });
 
     return categoriesToBeReturned;
+  }
+
+  /**
+   * Checks if the transactions in the index match the category's phrases.
+   * @param {Object} transactionsIndex the elasticlunr index with the transaction(s)
+   * to be categorized.
+   * @param {Object} category the category to be checked
+   * @returns {Boolean} true if there was a match and false otherwise.
+   */
+  _matchesAnyPhrase(transactionsIndex, category) {
+    // guard check if the category has phrases
+    if (!category.phrases) {
+      return false;
+    }
+    
+    // Let's find out if it matches the whole phrase
+    let matchesPhrase = false;
+    
+    // Check if it matches any of the phrases configured
+    category.phrases.forEach(phrase => {
+      const searchResult = transactionsIndex.search(phrase, DEFAULT_PHRASE_SEARCH_CONFIG);
+      // Did we find something
+      if (searchResult.length > 0 && !matchesPhrase) {
+        matchesPhrase = true;
+      }
+    });
+    
+    return matchesPhrase;
+  }
+  
+  _matchesAnyKeyword(transactionsIndex, category) {
+    // should be an array of keywords
+    if (!category.keywords) {
+      return false;
+    }
+
+    // should contain any of the keywords
+    // Search our index
+    const searchResult = transactionsIndex.search(category.keywords.join(' '), DEFAULT_KEYWORD_SEARCH_CONFIG);
+    
+    if (searchResult.length > 0) {
+      // Found something
+      return true;
+    }
+
+    return false;
+  }
+  
+  _createTransactionIndex(transaction) {
+    // Configure our document index
+    const index = new this.elasticlunr(function () {
+      this.addField('description');
+      this.setRef('index');
+    });
+    
+    // Add our tuple
+    index.addDoc(transaction);
+
+    return index;
   }
 
   categorizeTransactions(transactions, categories) {
