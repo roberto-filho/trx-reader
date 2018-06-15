@@ -56,7 +56,7 @@ class BankTransactionCategorizer {
    * Categorizes one transaction, returning only the first match.
    * @param {Object} transaction the transaction object to be categorized
    * @param {Array} categories the categories to be used to categorize this transaction.
-   * @param {Boolean} [returnMany=false] if the method should return many category matches
+   * @param {Boolean} [returnMany=false] if the method should return multiple category matches
    */
   _categorizeOne(transaction, categories, returnMany = false) {
     let emptyResult = returnMany ? [] : {};
