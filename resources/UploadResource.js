@@ -44,17 +44,17 @@ module.exports = class BankResource {
                 }
               });
     
-              // const DatabaseService = require('../database/DatabaseService');
+              const DatabaseService = require('../database/DatabaseService');
     
-              // DatabaseService.listAllCategories()
-              //   .then((categories) => {
-              //     const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
-              //     const categorizer = new BankTransactionCategorizer();
+              DatabaseService.listAllCategories()
+                .then((categories) => {
+                  const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
+                  const categorizer = new BankTransactionCategorizer();
                   
-              //     const categorized = categorizer.categorize(transactions, categories);
+                  const categorized = categorizer.sortIntoCategories(transactions, categories);
     
-              //     res.json(categorized).end();
-              //   });
+                  res.json(categorized).end();
+                });
     
               res.json(transactions).end();
             })

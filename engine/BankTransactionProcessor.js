@@ -24,7 +24,7 @@ module.exports = class BankTransactionProcessor {
                 // All that don't fall into a category should have one created
                 const categorizer = new BankTransactionCategorizer();
               
-                const categorized = categorizer.categorize(transactionObjects, categories);
+                const categorized = categorizer.sortIntoCategories(transactionObjects, categories);
               
                 return categorized;
               });

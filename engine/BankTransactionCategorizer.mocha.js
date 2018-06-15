@@ -30,8 +30,8 @@ describe('BankTransactionCategorizer', () => {
     const categorizer = new Categorizer();
     
     describe('categorize single', () => {
-      const emptyCategorizedTransaction = categorizer.categorize([mockTransactionRowWithBarDescription], categories);
-      const categorizedTransaction = categorizer.categorize([mockTransactionRowWithBarAndRestauranteInDescription], categories);
+      const emptyCategorizedTransaction = categorizer.sortIntoCategories([mockTransactionRowWithBarDescription], categories);
+      const categorizedTransaction = categorizer.sortIntoCategories([mockTransactionRowWithBarAndRestauranteInDescription], categories);
       
       it('should return an empty array with no categories', () => {
         return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;
@@ -56,7 +56,7 @@ describe('BankTransactionCategorizer', () => {
     });
     
     context('with empty transactions argument', () => {
-      const categorizedTransactions = categorizer.categorize([], categories);
+      const categorizedTransactions = categorizer.sortIntoCategories([], categories);
       
       it('should return a valid value', () => {
         return expect(categorizedTransactions).to.not.be.null.and.not.be.undefined;

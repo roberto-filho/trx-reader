@@ -25,7 +25,7 @@ class BankTransactionCategorizer {
   * @param {Object} categories the categories for the transactions to be divided into
   * @returns {Array} the categories with the transactions associated
   */
-	categorize(transactions, categories = {}) {
+	sortIntoCategories(transactions, categories = {}) {
     
     const categoryMap = {};
     
