@@ -23,8 +23,13 @@ module.exports = class BankTransactionProcessor {
                 // Check if all transactions have categories
                 // All that don't fall into a category should have one created
                 const categorizer = new BankTransactionCategorizer();
+
+                // For each transaction, check for user categories
+                // If there is one, the associate and we're done.
+
+                // If one is not found, check for default category.
               
-                const categorized = categorizer.sortIntoCategories(transactionObjects, categories);
+                const categorized = categorizer.addManyCategoriesToTransactions(transactionObjects, categories);
               
                 return categorized;
               });

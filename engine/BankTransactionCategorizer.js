@@ -51,6 +51,39 @@ class BankTransactionCategorizer {
     // Transform the categories into an array
     return Object.keys(categoryMap).map(categoryId => categoryMap[categoryId]);
   }
+
+  
+  /**
+   * Attaches to the transactions the first category that matches.
+   * @param {Array} transactions the transactions to have their category populated.
+   * @param {Array} categories the categories to put into the transactions.
+   * @returns {Array} the transaction array with no more than one category associated to them.
+   */
+  addOneCategoryToTransactions(transactions, categories) {
+    return transactions.map((trx) => {
+      
+      trx.categories = this._categorizeOne(trx, categories, false);
+      
+      return trx;
+    });
+  }
+  
+  /**
+   * Attaches to the transactions corresponding category matches.
+   * @param {Array} transactions the transactions to have their categories populated.
+   * @param {Array} categories the categories to put into the transactions.
+   * @returns {Array} the transaction array with one or more categories associated to them.
+   */
+  addManyCategoriesToTransactions(transactions, categories) {
+    return transactions.map((trx) => {
+      
+      trx.categories = this._categorizeOne(trx, categories, true);
+      
+      return trx;
+    });
+  }
+
+  
   
   /**
    * Categorizes one transaction, returning only the first match.
@@ -193,16 +226,7 @@ class BankTransactionCategorizer {
 
     return false;
   }
-  
-  categorizeTransactions(transactions, categories) {
-    return transactions.map((trx) => {
-      
-      trx.categories = this._categorizeOne(trx, categories, true);
-      
-      return trx;
-    });
-  }
-	
+
 }
 
 module.exports = BankTransactionCategorizer;

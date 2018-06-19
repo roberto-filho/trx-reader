@@ -124,6 +124,15 @@ class DatabaseService {
       })
       .catch((err) => connection.close());
   }
+
+  /**
+   * Should check if there is a user category.
+   * @param {Object} transaction the transaction to check for user category
+   */
+  static getUserCategory(transaction) {
+    // TODO
+    return Promise.resolve(false);
+  }
 }
 
 module.exports = DatabaseService;

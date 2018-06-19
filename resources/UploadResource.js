@@ -51,12 +51,10 @@ module.exports = class BankResource {
                   const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
                   const categorizer = new BankTransactionCategorizer();
                   
-                  const categorized = categorizer.sortIntoCategories(transactions, categories);
+                  const categorized = categorizer.addManyCategoriesToTransactions(transactions, categories);
     
                   res.json(categorized).end();
                 });
-    
-              res.json(transactions).end();
             })
             .catch((err) => {
               res.status(500).json(err).end();

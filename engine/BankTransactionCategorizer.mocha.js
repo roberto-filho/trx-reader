@@ -76,7 +76,7 @@ describe('BankTransactionCategorizer', () => {
       const promisedCategories = new Reader().readFile('test/categorizer/Extrato.csv').then(transactions => {
   
         const categorizedTransactions = new Categorizer()
-          .categorizeTransactions(transactions, categories);
+          .addManyCategoriesToTransactions(transactions, categories);
   
         return categorizedTransactions;
       });
