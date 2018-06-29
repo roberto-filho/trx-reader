@@ -12,6 +12,11 @@ const DEFAULT_PHRASE_SEARCH_CONFIG = {
   bool: 'AND'
 };
 
+const DEFAULT_OPTIONS = {
+  matchKeywords: true, 
+  matchPhrases: true
+};
+
 class BankTransactionCategorizer {
   
   constructor() {
@@ -83,6 +88,20 @@ class BankTransactionCategorizer {
     });
   }
 
+  chooseCategory (transaction, categories) {
+    // First we filter the user categories
+    const userCategories = categories.filter(cat => cat.userChosen);
+
+    const category = this._categorizeOne(transaction, categories, false, {matchPhrases: true});
+    
+    // Check if any user categories matched
+    if (category) {
+      return category;
+    }
+    
+    // Keep searching
+    return void 0;
+  };
   
   
   /**
@@ -91,7 +110,7 @@ class BankTransactionCategorizer {
    * @param {Array} categories the categories to be used to categorize this transaction.
    * @param {Boolean} [returnMany=false] if the method should return multiple category matches
    */
-  _categorizeOne(transaction, categories, returnMany = false) {
+  _categorizeOne(transaction, categories, returnMany = false, options = DEFAULT_OPTIONS) {
     let emptyResult = returnMany ? [] : {};
     
     // First of all, sanity checks
@@ -114,64 +133,20 @@ class BankTransactionCategorizer {
     // Add our tuple
     index.addDoc(transaction);
 
-    const categorizationFunction = returnMany
-      ? this._categorizeOneAndReturnManyCategories
-      : this._categorizeOneAndReturnOneCategory;
+    const SingleCategorizer = require('./categorizers/SingleCategoryCategorizer');
+    const MultipleCategorizer = require('./categorizers/MultipleCategoriesCategorizer');
+
+    const matchers = {
+      keyword: this._matchesAnyKeyword,
+      phrase: this._matchesAnyPhrase
+    };
+
+    const categorizer = returnMany
+      ? new MultipleCategorizer(matchers)
+      : new SingleCategorizer(matchers);
     
     // Choose which method to use
-    return categorizationFunction.call(this, index, categories);
-  }
-
-  _categorizeOneAndReturnManyCategories(index, categories) {
-    const categoriesToBeReturned = [];
-    
-    categories.forEach(transactionCategory => {
-      
-      let matchesPhrase = this._matchesAnyPhrase(index, transactionCategory);
-        
-      if (matchesPhrase) {
-        // One phrase matched
-        categoriesToBeReturned.push(transactionCategory);
-      }
-      
-      // Only run this if a phrase has not been already matched
-      if (!matchesPhrase) {
-
-        if (this._matchesAnyKeyword(index, transactionCategory)) {
-          // Found something
-          categoriesToBeReturned.push(transactionCategory);
-        }
-      }
-      
-    });
-
-    return categoriesToBeReturned;
-  }
-
-  _categorizeOneAndReturnOneCategory(index, categories) {
-    let categoryToBeReturned = {};
-
-    categories.some(categoryElement => {
-
-      let matchesPhrase = this._matchesAnyPhrase(index, categoryElement);
-      
-      if (matchesPhrase) {
-        // One phrase matched
-        categoryToBeReturned = categoryElement;
-        return true;
-      }
-      
-      if (this._matchesAnyKeyword(index, categoryElement)) {
-        // Found something
-        categoryToBeReturned = categoryElement;
-        return true;
-      }
-      
-      // No dice
-      return false;
-    });
-
-    return categoryToBeReturned;
+    return categorizer.categorize(index, categories, options);
   }
 
   /**

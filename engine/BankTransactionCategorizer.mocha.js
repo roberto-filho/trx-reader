@@ -50,7 +50,7 @@ describe('BankTransactionCategorizer', () => {
           });
           it('should have an id', async () => {
             return expect(category).to.have.property('id');
-          })
+          });
         })
       });
     });
@@ -128,6 +128,33 @@ describe('BankTransactionCategorizer', () => {
 
         return expect(promisedCategories).to.eventually.satisfy(matcher);
       });
+    });
+  });
+
+  context('when there is a user category', function () {
+    describe('#chooseCategory', function () {
+
+      const categorizer = new Categorizer();
+
+      it('should return a user category if there is one with the transaction\'s description', async () => {
+
+        const transaction = {
+          index: 0,
+          description: 'COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR'
+        };
+  
+        const category = {
+          id: 4,
+          description: 'posto colombo',
+          userChosen:  true,
+          phrases: ['COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR']
+        };
+
+        const returnedCategory = categorizer.chooseCategory(transaction, [category]);
+
+        return expect(returnedCategory, 'did not return the correct category').to.have.property('id', 4);
+      });
+    
     });
   });
   
