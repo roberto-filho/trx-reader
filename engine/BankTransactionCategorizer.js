@@ -92,15 +92,15 @@ class BankTransactionCategorizer {
     // First we filter the user categories
     const userCategories = categories.filter(cat => cat.userChosen);
 
-    const category = this._categorizeOne(transaction, categories, false, {matchPhrases: true});
+    const category = this._categorizeOne(transaction, userCategories, false, {matchPhrases: true});
     
     // Check if any user categories matched
-    if (category) {
+    if (category && Object.keys(category).length > 0) {
       return category;
     }
     
     // Keep searching
-    return void 0;
+    return null;
   };
   
   

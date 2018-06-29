@@ -136,23 +136,38 @@ describe('BankTransactionCategorizer', () => {
 
       const categorizer = new Categorizer();
 
+      const transaction = {
+        index: 0,
+        description: 'COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR'
+      };
+
+      const category = {
+        id: 4,
+        description: 'posto colombo',
+        userChosen: true,
+        phrases: ['COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR']
+      };
+
       it('should return a user category if there is one with the transaction\'s description', async () => {
-
-        const transaction = {
-          index: 0,
-          description: 'COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR'
-        };
   
-        const category = {
-          id: 4,
-          description: 'posto colombo',
-          userChosen:  true,
-          phrases: ['COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR']
-        };
-
         const returnedCategory = categorizer.chooseCategory(transaction, [category]);
 
         return expect(returnedCategory, 'did not return the correct category').to.have.property('id', 4);
+      });
+
+      it('should return undefined if there isn\'t a user category with the transaction\'s description', async () => {
+        const cat = Object.assign({}, category);
+        
+        // No userChosen category
+        cat.userChosen = false;
+
+        const returnedCategory = categorizer.chooseCategory(transaction, [cat]);
+
+        return expect(returnedCategory, 'did not return the correct category').to.be.null;
+      });
+
+      it('should choose from defaults if no user chosen categories', async () => {
+        
       });
     
     });
