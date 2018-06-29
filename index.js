@@ -13,7 +13,7 @@ DatabaseService.listAllCategories().then(categories => {
   reader.readFile(fileToRead).then(transactionObjects => {
     const categorizer = new BankTransactionCategorizer();
   
-    const categorized = categorizer.categorize(transactionObjects, categories);
+    const categorized = categorizer.sortIntoCategories(transactionObjects, categories);
   
     console.log(JSON.stringify(categorized, null, 2));
   });
