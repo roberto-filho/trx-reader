@@ -100,18 +100,13 @@ describe('BankTransactionCategorizer', () => {
       // TODO Not use functions. Use chai array assertions
 
       it('should return exactly 20 transactions with categories', async () => {
-        const matcher = (transactions) => {
-          // console.log(JSON.stringify(transactions));
-          let categoryCount = 0;
-          transactions.forEach(trx => {
-            if (trx.categories.length > 0) {
-              categoryCount++;
-            }
-          });
-          return categoryCount === 20;
-        };
+        const categories = await promisedCategories;
 
-        return expect(promisedCategories).to.eventually.satisfy(matcher);
+        const trxWithCategories = categories
+          .map(trx => trx.categories)
+          .filter(categories => !!categories.length);
+
+        return expect(trxWithCategories).to.have.lengthOf(20);
       });
 
       it('should return exactly 18 transactions with 2 categories', async () => {

@@ -40,5 +40,5 @@ describe('BankTransactionProcessor', () => {
     // console.log('Deleting categories.');
     return DatabaseService.deleteAllCategories()
       .then(done());;
-  })
+  });
 });
