@@ -73,29 +73,38 @@ class DatabaseService {
       });
   }
 
-  static listAllCategories() {
+  /**
+   * Retrieves all objects from a collection.
+   * Errors are logged to error console.
+   * @param {string} collectionName the collection name to list.
+   */
+  static listAll(collectionName) {
     let connection;
     return this.connect()
       .then(client => connection = client)
       .then(client => this.connectToDb(client))
-      .then(db => db.collection('categories'))
+      .then(db => db.collection(collectionName))
       .then(collection => {
         return collection.find({}).toArray().then(connection.close());
       })
       .catch(console.error);
   }
+
+  static listAllCategories() {
+    return this.listAll('categories');
+  }
   
   static deleteAll (collectionName) {
     let connection;
     return this.connect()
-    .then(client => connection = client)
-    .then(client => this.connectToDb(client))
-    .then(db => db.collection(collectionName))
-    .then(collection => {
-      const promisedDelete = collection.deleteMany({});
-      return promisedDelete.then(connection.close());
-    })
-    .catch(console.error);
+      .then(client => connection = client)
+      .then(client => this.connectToDb(client))
+      .then(db => db.collection(collectionName))
+      .then(collection => {
+        const promisedDelete = collection.deleteMany({});
+        return promisedDelete.then(connection.close());
+      })
+      .catch(console.error);
   }
   
   static deleteAllCategories() {
@@ -130,7 +139,7 @@ class DatabaseService {
    * @param {Object} transaction the transaction to check for user category
    */
   static getUserCategory(transaction) {
-    // TODO
+    // @TODO
     return Promise.resolve(false);
   }
 }
