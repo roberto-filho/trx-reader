@@ -1,45 +1,48 @@
 const DEFAULT_KEYWORD_SEARCH_CONFIG = {
   fields: {
-    description: {boost: 1}
+    description: { boost: 1 }
   },
   bool: 'OR'
 };
 
 const DEFAULT_PHRASE_SEARCH_CONFIG = {
   fields: {
-    description: {boost: 1}
+    description: { boost: 1 }
   },
   bool: 'AND'
 };
 
 const DEFAULT_OPTIONS = {
-  matchKeywords: true, 
+  matchKeywords: true,
   matchPhrases: true
 };
 
+const UNCATEGORIZED_CATEGORY = { id: 'x', description: 'Uncategorized' };
+
 class BankTransactionCategorizer {
-  
+
   constructor() {
     this.fs = require('fs');
     this.elasticlunr = require('elasticlunr');
+    this.database = require('../database/DatabaseService');
   }
-  
+
   /**
   * Categorizes transactions.
   * @param {Array} transactions the transactions to be categorized
   * @param {Object} categories the categories for the transactions to be divided into
   * @returns {Array} the categories with the transactions associated
   */
-	sortIntoCategories(transactions, categories = {}) {
-    
+  sortIntoCategories(transactions, categories = {}) {
+
     const categoryMap = {};
-    
+
     transactions.forEach(trx => {
       const trxCategory = this._categorizeOne(trx, categories);
       if (Object.keys(trxCategory).length !== 0) {
         // Check if it exists
         const existingCategory = categoryMap[trxCategory.id];
-        
+
         if (existingCategory) {
           // If one or more transactions already exist, just push
           existingCategory.transactions.push(trx);
@@ -52,12 +55,12 @@ class BankTransactionCategorizer {
         }
       }
     });
-    
+
     // Transform the categories into an array
     return Object.keys(categoryMap).map(categoryId => categoryMap[categoryId]);
   }
 
-  
+
   /**
    * Attaches to the transactions the first category that matches.
    * @param {Array} transactions the transactions to have their category populated.
@@ -66,13 +69,13 @@ class BankTransactionCategorizer {
    */
   addOneCategoryToTransactions(transactions, categories) {
     return transactions.map((trx) => {
-      
+
       trx.categories = this._categorizeOne(trx, categories, false);
-      
+
       return trx;
     });
   }
-  
+
   /**
    * Attaches to the transactions corresponding category matches.
    * @param {Array} transactions the transactions to have their categories populated.
@@ -81,29 +84,54 @@ class BankTransactionCategorizer {
    */
   addManyCategoriesToTransactions(transactions, categories) {
     return transactions.map((trx) => {
-      
+
       trx.categories = this._categorizeOne(trx, categories, true);
-      
+
       return trx;
     });
   }
 
-  chooseCategory (transaction, categories) {
+  chooseCategory(transaction, categories) {
     // First we filter the user categories
-    const userCategories = categories.filter(cat => cat.userChosen);
+    const userCategories = categories.filter(cat => !!cat.userChosen);
 
-    const category = this._categorizeOne(transaction, userCategories, false, {matchPhrases: true});
-    
+    const category = this._categorizeOne(
+      transaction,
+      userCategories,
+      false,
+      // We only match phrases because user chosen work with phrases
+      { matchPhrases: true, matchKeywords: false }
+    );
+
     // Check if any user categories matched
     if (category && Object.keys(category).length > 0) {
       return category;
     }
-    
+
     // Keep searching
-    return null;
+    // Search the default categories.
+    // this.database.listDefaultCategories();
+    const defaultCategories = categories.filter(cat => !!!cat.userChosen);
+
+    const defaultCategoryMatch = this._categorizeOne(
+      transaction,
+      defaultCategories,
+      false,
+      // When searching the defaults, try to match everything
+      { matchPhrases: true, matchKeywords: true }
+    );
+
+    // What if the transaction does not match any default category?
+    // We return an 'uncategorized' category
+
+    if (!defaultCategoryMatch || Object.keys(defaultCategoryMatch).length < 1) {
+      return UNCATEGORIZED_CATEGORY;
+    }
+
+    return defaultCategoryMatch;
   };
-  
-  
+
+
   /**
    * Categorizes one transaction, returning only the first match.
    * @param {Object} transaction the transaction object to be categorized
@@ -112,7 +140,7 @@ class BankTransactionCategorizer {
    */
   _categorizeOne(transaction, categories, returnMany = false, options = DEFAULT_OPTIONS) {
     let emptyResult = returnMany ? [] : {};
-    
+
     // First of all, sanity checks
     if (!categories) {
       return emptyResult;
@@ -124,12 +152,11 @@ class BankTransactionCategorizer {
     }
 
     // Configure our document index
-    // Configure our document index
     const index = new this.elasticlunr(function () {
       this.addField('description');
       this.setRef('index');
     });
-    
+
     // Add our tuple
     index.addDoc(transaction);
 
@@ -144,7 +171,7 @@ class BankTransactionCategorizer {
     const categorizer = returnMany
       ? new MultipleCategorizer(matchers)
       : new SingleCategorizer(matchers);
-    
+
     // Choose which method to use
     return categorizer.categorize(index, categories, options);
   }
@@ -161,10 +188,10 @@ class BankTransactionCategorizer {
     if (!category.phrases) {
       return false;
     }
-    
+
     // Let's find out if it matches the whole phrase
     let matchesPhrase = false;
-    
+
     // Check if it matches any of the phrases configured
     category.phrases.forEach(phrase => {
       const searchResult = transactionsIndex.search(phrase, DEFAULT_PHRASE_SEARCH_CONFIG);
@@ -173,10 +200,10 @@ class BankTransactionCategorizer {
         matchesPhrase = true;
       }
     });
-    
+
     return matchesPhrase;
   }
-  
+
   /**
    * Checks if the transactions in the index match the category's keywords.
    * @param {Object} transactionsIndex the elasticlunr index with the transaction(s)
@@ -193,7 +220,7 @@ class BankTransactionCategorizer {
     // should contain any of the keywords
     // Search our index
     const searchResult = transactionsIndex.search(category.keywords.join(' '), DEFAULT_KEYWORD_SEARCH_CONFIG);
-    
+
     if (searchResult.length > 0) {
       // Found something
       return true;

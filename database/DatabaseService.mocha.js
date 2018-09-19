@@ -2,7 +2,7 @@ const assert = require('assert');
 const expect = require('chai')
     .use(require('chai-as-promised'))
     .expect;
-
+const fs = require('fs');
 const testCategory = {
   "id": 4,
   "description": "posto colombo",
@@ -12,6 +12,10 @@ const testCategory = {
 const newTestCategory = () => Object.assign({}, testCategory);
 
 const DatabaseService = require('./DatabaseService');
+
+const readCategoriesJson = () => {
+  return JSON.parse(fs.readFileSync('test/database/categories.json', 'utf8'));
+}
 
 describe('DatabaseService', function () {
 
@@ -73,5 +77,34 @@ describe('DatabaseService', function () {
       
       return expect(deletionPromise, 'did not delete all categories').to.eventually.have.property('deletedCount');
     });
-  })
+  });
+
+  describe('#listDefaultCategories', function () {
+
+    context('when there are default and user categories in the database', function () {
+      
+      const testCategories = readCategoriesJson();
+
+      before((done) => {
+        DatabaseService.insert('categories', testCategories).then(done());
+      });
+      
+      // THE REAL TEST CASES
+      it('should return only the default categories', async () => {
+        const categories = await DatabaseService.listDefaultCategories();
+        const ids = categories.map(c => c.id);
+        // Multiple expects
+        return [
+          expect(categories).to.have.lengthOf(3),
+          expect(ids).to.have.members(['1', '3', '5']),
+        ];
+      });
+      
+      after((done) => {
+        DatabaseService.deleteAllCategories().then(done());
+      });
+
+    });
+
+  });
 });

@@ -1,0 +1,7 @@
+[
+  {"id": "1", "description": "bares e restaurantes", "keywords": ["engenho", "restaurante"]},
+  {"id": "2", "description": "lazer", "userChosen": true},
+  {"id": "3", "description": "vestuário"},
+  {"id": "4", "description": "posto colombo", "userChosen":true, "phrases": ["COMPRA CARTAO - COMPRA no estabelecimento POSTO COLOMBO          C"]},
+  {"id": "5", "description": "posto colombo keyword", "keywords": ["colombo"]}
+]

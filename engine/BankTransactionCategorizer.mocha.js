@@ -11,7 +11,7 @@ const mockTransactionRowWithBarDescription = {
   date: '20/02/2018',
   description: 'COMPRA CARTAO - COMPRA no estabelecimento BAR COSTA TORRES LTDA      T',
   value: '- R$ 6,00',
-  balance: '87,10'
+  balance: '87,10',
 };
 
 const mockTransactionRowWithBarAndRestauranteInDescription = {
@@ -19,8 +19,12 @@ const mockTransactionRowWithBarAndRestauranteInDescription = {
   date: '20/02/2018',
   description: 'COMPRA CARTAO - COMPRA no estabelecimento BAR E RESTAURANTE COSTA TORRES LTDA      T',
   value: '- R$ 6,00',
-  balance: '87,10'
+  balance: '87,10',
 };
+
+const readDefaultCategories = () => {
+  return JSON.parse(fs.readFileSync('test/categorizer/categories.json', 'utf8'));
+}
 
 describe('BankTransactionCategorizer', () => {
   
@@ -131,41 +135,69 @@ describe('BankTransactionCategorizer', () => {
 
       const categorizer = new Categorizer();
 
-      const transaction = {
+      const MOCK_TRANSACTION = {
         index: 0,
         description: 'COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR'
       };
 
-      const category = {
+      const MOCK_CATEGORY = {
         id: 4,
         description: 'posto colombo',
         userChosen: true,
         phrases: ['COMPRA CARTAO - COMPRA no estabelecimento TIO ZE REFEICOES E MAR']
       };
 
+      const DEFAULT_CATEGORIES = Object.freeze(readDefaultCategories());
+
       it('should return a user category if there is one with the transaction\'s description', async () => {
   
-        const returnedCategory = categorizer.chooseCategory(transaction, [category]);
+        const returnedCategory = categorizer.chooseCategory(MOCK_TRANSACTION, [MOCK_CATEGORY]);
 
         return expect(returnedCategory, 'did not return the correct category').to.have.property('id', 4);
       });
 
-      it('should return undefined if there isn\'t a user category with the transaction\'s description', async () => {
-        const cat = Object.assign({}, category);
+      it("should return an 'uncategorized' category if there isn't a user category with the transaction's description", async () => {
+        const cat = {...MOCK_CATEGORY};
+        const trx = {
+          ...MOCK_TRANSACTION,
+          description: 'COMPRA CARTAO - COMPRA no estabelecimento PORTAL DA VILA',
+        };
         
         // No userChosen category
-        cat.userChosen = false;
+        cat.userChosen = true;
 
-        const returnedCategory = categorizer.chooseCategory(transaction, [cat]);
+        const returnedCategory = categorizer.chooseCategory(trx, [cat].concat(DEFAULT_CATEGORIES));
 
-        return expect(returnedCategory, 'did not return the correct category').to.be.null;
+        return expect(returnedCategory, 'did not return the correct category')
+          .to.include({description: 'Uncategorized', id: 'x'})
+          .and.satisfy(cat => !!!cat.userChosen);
       });
 
-      it('should choose from defaults if no user chosen categories', async () => {
-        
-      });
-    
     });
+
+  });
+
+  context('when there are no user categories', function () {
+      
+    const MOCK_TRANSACTION = {
+      index: 0,
+      description: 'COMPRA CARTAO - COMPRA no estabelecimento TIO ZE RESTAURANTE'
+    };
+
+    const categorizer = new Categorizer();
+
+    describe('#chooseCategory', function () {
+      
+      it('should choose from defaults', async () => {
+        // Create the default categories
+        const returnedCategory = categorizer.chooseCategory(MOCK_TRANSACTION, readDefaultCategories());
+
+        return expect(returnedCategory, 'did not return the correct category')
+          .to.have.property('id', '1');
+      });
+
+    });
+
   });
   
 });

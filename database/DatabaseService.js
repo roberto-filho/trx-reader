@@ -90,6 +90,25 @@ class DatabaseService {
       .catch(console.error);
   }
 
+  static async listDefaultCategories() {
+    let connection = await this.connect();
+    let collection = await this.connectToDb(connection)
+      .then(db => db.collection('categories'));
+    
+    const cursor = await collection.find({
+      $or: [
+        { userChosen: false },
+        { userChosen: { $exists: false } }
+      ]
+    });
+
+    const result = await cursor.toArray();
+
+    await connection.close();
+
+    return result.map(e => e);
+  }
+
   static listAllCategories() {
     return this.listAll('categories');
   }
@@ -118,9 +137,14 @@ class DatabaseService {
   /**
    * Inserts an object in a collection. Runs no validations.
    * @param {string} collectionName the collection to insert the object into
-   * @param {object} objectToInsert the object to insert in the collection
+   * @param {object} objectsToInsert the object or array of objects to insert in the collection
    */
-  static insert(collectionName, objectToInsert) {
+  static insert(collectionName, objectsToInsert) {
+    // Sanity checks
+    if (typeof collectionName !== 'string') {
+      throw Error(`Argument collectionName should be string. Actual: '${collectionName}'`);
+    }
+    
     let connection;
     return this.connect()
       .then(client => connection = client)
@@ -128,7 +152,7 @@ class DatabaseService {
       .then(db => db.collection(collectionName))
       .then(databaseCollection => {
         // TODO Check if the period has already been uploaded for that account
-        const databaseResult = databaseCollection.insert(objectToInsert);
+        const databaseResult = databaseCollection.insert(objectsToInsert);
         return databaseResult.then(connection.close());
       })
       .catch((err) => connection.close());
