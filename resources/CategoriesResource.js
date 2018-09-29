@@ -1,9 +1,14 @@
 const fs = require('fs');
 
 const DatabaseService = require('../database/DatabaseService');
+const BankTransactionReader = require('../engine/BankTransactionReader');
 
 module.exports = class CategoriesResource {
 
+  constructor () {
+    this.trxReader = new BankTransactionReader();
+  }
+  
   registerPaths(express) {
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
@@ -19,7 +24,7 @@ module.exports = class CategoriesResource {
     express.delete('/api/bank/categories', this.deleteAllCategories);
   }
 
-  listCategories (req, res) {
+  listCategories(req, res) {
     DatabaseService.listAllCategories()
       .then(categories => {
         res.status(200).json(categories);
@@ -29,7 +34,7 @@ module.exports = class CategoriesResource {
       });
   }
 
-  createCategory (req, res) {
+  createCategory(req, res) {
     if (req.is('application/json')) {
       DatabaseService.insertCategory(req.body)
         .then(inserted => {
@@ -47,7 +52,7 @@ module.exports = class CategoriesResource {
     }
   }
 
-  deleteAllCategories (req, res) {
+  deleteAllCategories(req, res) {
     DatabaseService.deleteAllCategories()
       .then(deleted => {
         res.status(200).json(deleted).end();
@@ -64,45 +69,44 @@ module.exports = class CategoriesResource {
    */
   categorize(req, res) {
 
-    const BankTransactionReader = require('../engine/BankTransactionReader');
-
-    const trxReader = new BankTransactionReader();
-
     if (Object.keys(req.files).length === 0) {
       // There is no file upload, throw error
       res.status(422).json({error: 'No file to upload.'}).end();
-    } else {
-      // Parse only first file
-      const firstFileKey = Object.keys(req.files)[0];
-      const firstFile = req.files[firstFileKey];
-      const firstFilePath = firstFile.file;
-
-      console.log(`Handling request file: ${firstFilePath}`);
-
-      trxReader.readFile(firstFilePath)
-        .then(transactions => {
-          // Delete file after done with it
-          fs.unlink(firstFilePath, (err) => {
-            if (err) {
-              console.error(`Error deleting file [${firstFilePath}]: ${err}`);
-            }
-          });
-
-          DatabaseService.listAllCategories()
-            .then((categories) => {
-              const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
-              const categorizer = new BankTransactionCategorizer();
-              
-              const categorized = categorizer.categorize(transactions, categories);
-
-              res.json(categorized).end();
-            });
-        })
-        .catch((err) => {
-          res.status(500).json(err).end();
-        });
-      
+      return;
     }
+    // Parse only first file
+    const firstFileKey = Object.keys(req.files)[0];
+    const firstFile = req.files[firstFileKey];
+    const firstFilePath = firstFile.file;
+
+    console.log(`Handling request file: ${firstFilePath}`);
+
+    this.trxReader.readFile(firstFilePath)
+      .then(transactions => {
+        // Delete file after done with it
+        this._deleteFile(firstFilePath);
+
+        DatabaseService.listAllCategories()
+          .then(categories => this._categorizeTransactions(transactions, categories))
+          .then(categorizedTransactions => res.json(categorizedTransactions).end());
+      })
+      .catch((err) => {
+        res.status(500).json(err).end();
+      });
   }
 
+  _deleteFile(firstFilePath) {
+    fs.unlink(firstFilePath, (err) => {
+      if (err) {
+        console.error(`Error deleting file [${firstFilePath}]: ${err}`);
+      }
+    });
+  }
+
+  _categorizeTransactions(transactions, categories) {
+    const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
+    const categorizer = new BankTransactionCategorizer();
+    const categorized = categorizer.categorize(transactions, categories);
+    return categorized;
+  }
 }

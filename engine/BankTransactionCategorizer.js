@@ -1,26 +1,32 @@
 const DEFAULT_KEYWORD_SEARCH_CONFIG = {
   fields: {
-    description: { boost: 1 }
+    description: {boost: 1},
   },
-  bool: 'OR'
+  bool: 'OR',
 };
 
 const DEFAULT_PHRASE_SEARCH_CONFIG = {
   fields: {
-    description: { boost: 1 }
+    description: {boost: 1},
   },
-  bool: 'AND'
+  bool: 'AND',
 };
 
 const DEFAULT_OPTIONS = {
   matchKeywords: true,
-  matchPhrases: true
+  matchPhrases: true,
 };
 
-const UNCATEGORIZED_CATEGORY = { id: 'x', description: 'Uncategorized' };
+const UNCATEGORIZED_CATEGORY = {id: 'x', description: 'Uncategorized'};
 
+/**
+ * Categorizes transactions.
+ */
 class BankTransactionCategorizer {
 
+  /**
+   * Creates a new instance.
+   */
   constructor() {
     this.fs = require('fs');
     this.elasticlunr = require('elasticlunr');
@@ -31,10 +37,9 @@ class BankTransactionCategorizer {
   * Categorizes transactions.
   * @param {Array} transactions the transactions to be categorized
   * @param {Object} categories the categories for the transactions to be divided into
-  * @returns {Array} the categories with the transactions associated
+  * @return {Array} the categories with the transactions associated
   */
   sortIntoCategories(transactions, categories = {}) {
-
     const categoryMap = {};
 
     transactions.forEach(trx => {
@@ -65,7 +70,7 @@ class BankTransactionCategorizer {
    * Attaches to the transactions the first category that matches.
    * @param {Array} transactions the transactions to have their category populated.
    * @param {Array} categories the categories to put into the transactions.
-   * @returns {Array} the transaction array with no more than one category associated to them.
+   * @return {Array} the transaction array with no more than one category associated to them.
    */
   addOneCategoryToTransactions(transactions, categories) {
     return transactions.map((trx) => {
@@ -80,7 +85,7 @@ class BankTransactionCategorizer {
    * Attaches to the transactions corresponding category matches.
    * @param {Array} transactions the transactions to have their categories populated.
    * @param {Array} categories the categories to put into the transactions.
-   * @returns {Array} the transaction array with one or more categories associated to them.
+   * @return {Array} the transaction array with one or more categories associated to them.
    */
   addManyCategoriesToTransactions(transactions, categories) {
     return transactions.map((trx) => {
