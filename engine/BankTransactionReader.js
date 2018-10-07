@@ -1,3 +1,8 @@
+// The number of rows to skip when reading the files.
+const ROWS_TO_SKIP = 7;
+// The header text
+const HEADER_TEXT = 'DATA LANÇAMENTO;HISTÓRICO;VALOR;SALDO';
+
 class BankTransactionReader {
   
   constructor() {
@@ -36,15 +41,22 @@ class BankTransactionReader {
       let rowIndex = 0;
       const rows = [];
       
+      // Control variable
+      let headerFinished = false;
+
       stream
         .pipe(reader)
         .on('error', reject)
         .on('data', row => {
           rowIndex++;
-          // Skip first five rows, they're bogus
-          if (rowIndex > 5) {
+          // Skip header rows, they're bogus
+          if (headerFinished) {
             // Create a row index
             rows.push(this._toTransactionObject([rowIndex-5].concat(row)));
+          }
+
+          if (!headerFinished) {
+            headerFinished = this._isHeader(row);
           }
         })
         .on('end', () => resolve(rows));
@@ -60,6 +72,17 @@ class BankTransactionReader {
       value: transactionRow[3],
       balance: transactionRow[4]
     };
+  }
+
+  /**
+   * Checks if a specific row matches header content.
+   * @param {Array} row the row of the CSV to be checked.
+   */
+  _isHeader(row) {
+    const rowText = row instanceof Array ? row.join(';') : row;
+    return rowText.indexOf('DATA LAN') > -1
+      && rowText.indexOf('AMENTO;HIST') > -1
+      && rowText.indexOf('RICO;VALOR;SALDO') > -1;
   }
 	
 }

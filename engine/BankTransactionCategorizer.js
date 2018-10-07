@@ -75,7 +75,7 @@ class BankTransactionCategorizer {
   addOneCategoryToTransactions(transactions, categories) {
     return transactions.map((trx) => {
 
-      trx.categories = this._categorizeOne(trx, categories, false);
+      trx.categories = this.chooseCategory(trx, categories);
 
       return trx;
     });

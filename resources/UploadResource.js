@@ -51,7 +51,7 @@ module.exports = class BankResource {
                   const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
                   const categorizer = new BankTransactionCategorizer();
                   
-                  const categorized = categorizer.addManyCategoriesToTransactions(transactions, categories);
+                  const categorized = categorizer.addOneCategoryToTransactions(transactions, categories);
     
                   res.json(categorized).end();
                 });

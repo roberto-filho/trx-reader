@@ -33,9 +33,16 @@ describe('BankTransactionCategorizer', () => {
     
     const categorizer = new Categorizer();
     
-    describe('categorize single', () => {
-      const emptyCategorizedTransaction = categorizer.sortIntoCategories([mockTransactionRowWithBarDescription], categories);
-      const categorizedTransaction = categorizer.sortIntoCategories([mockTransactionRowWithBarAndRestauranteInDescription], categories);
+    describe('when categorizing a single transation', () => {
+      const emptyCategorizedTransaction = categorizer.sortIntoCategories(
+        [mockTransactionRowWithBarDescription],
+        categories
+      );
+      
+      const categorizedTransaction = categorizer.sortIntoCategories(
+        [mockTransactionRowWithBarAndRestauranteInDescription],
+        categories
+      );
       
       it('should return an empty array with no categories', () => {
         return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;

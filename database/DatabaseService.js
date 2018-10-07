@@ -1,8 +1,4 @@
-// Connection URL
-const url = 'mongodb://localhost:27017';
-
-// Database Name
-const dbName = 'bank';
+const {databaseUrl, database} = require('../Application').getCurrentSettings();
 
 const MongoClient = require('mongodb').MongoClient;
 
@@ -19,7 +15,7 @@ class DatabaseService {
    */
   static connect() {
     const clientPromise = new Promise((resolve, reject) => {
-      MongoClient.connect(url, (err, client) =>{
+      MongoClient.connect(databaseUrl, (err, client) =>{
         if (err) {
           reject(err);
         } else {
@@ -41,9 +37,9 @@ class DatabaseService {
    */
   static connectToDb(client) {
     if (client) {
-      return Promise.resolve(client.db(dbName));
+      return Promise.resolve(client.db(database));
     } else {
-      return this.connect().then(client => client.db(dbName));
+      return this.connect().then(client => client.db(database));
     }
   }
 
