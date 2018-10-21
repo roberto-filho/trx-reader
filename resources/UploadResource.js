@@ -6,9 +6,7 @@ module.exports = class BankResource {
   registerPaths(express) {
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
-    this.uploadFile = this.uploadFile.bind(this);
-
-    express.post('/api/bank/upload', this.uploadFile);
+    express.post('/api/bank/upload', this.uploadFile.bind(this));
   }
 
   /**
@@ -24,7 +22,7 @@ module.exports = class BankResource {
 
     if (Object.keys(req.files).length === 0) {
       // There is no file upload, throw error
-      res.status(422).json({error: 'No file to upload.'}).end();
+      res.status(422).json({message: 'No file to upload.'}).end();
     } else {
       // Parse only first file
       const firstFileKey = Object.keys(req.files)[0];
@@ -35,7 +33,7 @@ module.exports = class BankResource {
 
       this._saveFileHeader(firstFilePath)
         .then(() => {
-          trxReader.readFile(firstFilePath)
+          return trxReader.readFile(firstFilePath)
             .then(transactions => {
               // Delete file after done with it
               fs.unlink(firstFilePath, (err) => {
@@ -57,7 +55,7 @@ module.exports = class BankResource {
                 });
             })
             .catch((err) => {
-              res.status(500).json(err).end();
+              res.status(500).json({message: err}).end();
             });
         });
       

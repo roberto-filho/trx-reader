@@ -196,6 +196,23 @@ class DatabaseService {
     // @TODO
     return Promise.resolve(false);
   }
+
+  static async findMaxCategoryId() {
+    let connection = await this.connect();
+    let collection = await this.connectToDb(connection)
+        .then(db => db.collection('categories'));
+
+    const cursor = await collection
+      .find()
+      .sort({id:-1})
+      .limit(1);
+
+    const result = await cursor.next();
+
+    await connection.close();
+
+    return (result && result.id) || '0';
+  }
 }
 
 module.exports = DatabaseService;

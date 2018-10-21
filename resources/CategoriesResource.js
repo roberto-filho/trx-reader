@@ -12,16 +12,11 @@ module.exports = class CategoriesResource {
   registerPaths(express) {
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
-    this.uploadFile = this.categorize.bind(this);
-    this.listCategories = this.listCategories.bind(this);
-    this.createCategory = this.createCategory.bind(this);
-    this.deleteAllCategories = this.deleteAllCategories.bind(this);
-
-    express.post('/api/bank/categorize', this.categorize);
+    express.post('/api/bank/categorize', this.categorize.bind(this));
     
-    express.post('/api/bank/categories', this.createCategory);
-    express.get('/api/bank/categories', this.listCategories);
-    express.delete('/api/bank/categories', this.deleteAllCategories);
+    express.post('/api/bank/categories', this.createCategory.bind(this));
+    express.get('/api/bank/categories', this.listCategories.bind(this));
+    express.delete('/api/bank/categories', this.deleteAllCategories.bind(this));
   }
 
   listCategories(req, res) {
@@ -34,9 +29,18 @@ module.exports = class CategoriesResource {
       });
   }
 
-  createCategory(req, res) {
+  async createCategory(req, res) {
+    // TODO Apply validation.
     if (req.is('application/json')) {
-      DatabaseService.insertCategory(req.body)
+      const payload = req.body;
+
+      if (!payload.id && payload.id !== 0) {
+        // Get the next id
+        const maxId = await DatabaseService.findMaxCategoryId();
+        payload.id = Number(maxId || 0) + 1;
+      }
+
+      DatabaseService.insertCategory(payload)
         .then(inserted => {
           res.status(201)
             .json(/* {id: inserted.ops[0]._id} */inserted)

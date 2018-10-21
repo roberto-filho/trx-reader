@@ -107,4 +107,42 @@ describe('DatabaseService', function () {
     });
 
   });
+
+  describe('#findMaxCategoryId', function () {
+    
+    context('when there are no categories', function() {
+      before((done) => {
+        DatabaseService.deleteAll('categories').then(done());
+      });
+
+      it('should return 0', async () => {
+        const promise = DatabaseService.findMaxCategoryId();
+
+        return expect(promise, 'did not return zero').to.eventually.equal('0');
+      });
+    });
+
+    context('when there are categories', function() {
+      before((done) => {
+        // @TODO should be able to use DatabaseSerice.insertCategory
+        DatabaseService.insert('categories',{
+          id: '1',
+          description: 'bares e restaurantes'
+        })
+        // .then(r => console.log(JSON.stringify(r)))
+        .then(done());
+      });
+
+      it('should return the max number', async () => {
+        const max = await DatabaseService.findMaxCategoryId();
+
+        return expect(max, 'did not return 1').to.equal('1');
+      });
+
+      after((done) => {
+        DatabaseService.deleteAllCategories().then(done());
+      });
+    });
+    
+  })
 });
