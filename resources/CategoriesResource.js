@@ -43,7 +43,7 @@ module.exports = class CategoriesResource {
       DatabaseService.insertCategory(payload)
         .then(inserted => {
           res.status(201)
-            .json(/* {id: inserted.ops[0]._id} */inserted)
+            .json(/* {id: inserted.ops[0]._id} */{id: inserted.insertedIds[0]})
             .end();
         })
         .catch(err => {
