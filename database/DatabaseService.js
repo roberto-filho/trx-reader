@@ -14,6 +14,8 @@ class DatabaseService {
    * @return {Promise} the client
    */
   static connect() {
+    console.log('Connecting to database with url:', databaseUrl);
+    
     const clientPromise = new Promise((resolve, reject) => {
       MongoClient.connect(databaseUrl, (err, client) =>{
         if (err) {
