@@ -1,0 +1,43 @@
+stages:
+  - test
+  - build
+
+build-master:
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" # $CI_REGISTRY
+  stage: build
+  script:
+    - docker build --pull -t "$IMAGE_NAME" .
+    - docker push "$IMAGE_NAME"
+  only:
+    - master
+
+build:
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD" # $CI_REGISTRY
+  stage: build
+  script:
+    - docker build --pull -t "$IMAGE_NAME:$CI_COMMIT_REF_SLUG" .
+    - docker push "$IMAGE_NAME:$CI_COMMIT_REF_SLUG"
+  except:
+    - master
+
+test_all:
+  image: node:10.12.0-alpine
+  stage: test
+  services:
+    - mvertes/alpine-mongo:latest
+  script:
+   - npm install
+   - DB_URL=mongodb://alpine-mongo:27017 npm run test
+  tags:
+    - docker
+  cache:
+    paths:
+    - node_modules/
