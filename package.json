@@ -2,10 +2,10 @@
   "name": "bank-trxs-reader",
   "version": "0.0.1",
   "description": "Reads bank (banco inter) transactions",
-  "main": "startServer.js",
+  "main": "server.js",
   "scripts": {
     "test": "mocha \"**/**/*.mocha.js\"",
-    "start": "PORT=9393 node startServer.js",
+    "startDefaultPort": "PORT=8080 node server.js",
     "db:create": "node insertCategories.js"
   },
   "repository": {
