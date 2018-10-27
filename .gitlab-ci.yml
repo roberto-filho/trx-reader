@@ -35,8 +35,8 @@ test_all:
     - name: mvertes/alpine-mongo:latest
       alias: mongo
   script:
-    - cat $TEST_EXTRATO_04 | base64 -d > test/Extrato-2018-04.csv
-    - cat $TEST_EXTRATO | base64 -d > test/Extrato.csv
+    - echo $TEST_EXTRATO_04 | base64 -d > test/Extrato-2018-04.csv
+    - echo $TEST_EXTRATO | base64 -d > test/Extrato.csv
     - cp test/Extrato-2018-04.csv test/categorizer/Extrato.csv
     - cp test/Extrato-2018-04.csv test/trx-processor/Extrato.csv
     - npm install
