@@ -1,6 +1,7 @@
 stages:
   - test
   - build
+  - deploy
 
 build-master:
   image: docker:latest
@@ -46,3 +47,11 @@ test_all:
   cache:
     paths:
     - node_modules/
+
+deploy-prod:
+  image: valudio/docker-sshpass:alpine
+  stage: deploy
+  script:
+    - sshpass -p $DEPLOY_PASSWD ssh -o StrictHostKeyChecking=no $DEPLOY_HOST "COMPOSE_FILE=$COMPOSE_FILE_LOCATION ./update-bank.sh"
+  only:
+    - master
