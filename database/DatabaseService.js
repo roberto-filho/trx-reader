@@ -180,7 +180,6 @@ class DatabaseService {
         .then(client => this.connectToDb(client))
         .then(db => db.collection(collectionName))
         .then(databaseCollection => {
-          // TODO Check if the period has already been uploaded for that account
           const databaseResult = databaseCollection.insert(objectsToInsert);
           return databaseResult.then(connection.close());
         })
@@ -212,6 +211,16 @@ class DatabaseService {
     await connection.close();
 
     return (result && result.id) || '0';
+  }
+
+  /**
+   * Inserts a header into the database. No validation is done.
+   * @param {object} header the header object to be inserted.
+   */
+  static insertHeader(header) {
+    // Add createdAt date
+    header.createdAt = new Date();
+    return this.insert('uploadedHeaders', header);
   }
 }
 

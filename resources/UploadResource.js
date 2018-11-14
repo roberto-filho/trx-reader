@@ -1,5 +1,7 @@
 const fs = require('fs');
 const BankFileHeaderReader = require('../engine/BankFileHeaderReader');
+const DatabaseService = require('../database/DatabaseService');
+const headerReader = new BankFileHeaderReader();
 
 module.exports = class BankResource {
 
@@ -14,7 +16,7 @@ module.exports = class BankResource {
    * @param {object} request the request
    * @param {object} response the response
    */
-  uploadFile(req, res) {
+  async uploadFile(req, res) {
 
     const BankTransactionReader = require('../engine/BankTransactionReader');
 
@@ -31,45 +33,39 @@ module.exports = class BankResource {
 
       console.log(`Handling request file: ${firstFilePath}`);
 
-      this._saveFileHeader(firstFilePath)
-        .then(() => {
-          return trxReader.readFile(firstFilePath)
-            .then(transactions => {
-              // Delete file after done with it
-              fs.unlink(firstFilePath, (err) => {
-                if (err) {
-                  console.error(`Error deleting file [${firstFilePath}]: ${err}`);
-                }
-              });
-    
-              const DatabaseService = require('../database/DatabaseService');
-    
-              DatabaseService.listAllCategories()
-                .then((categories) => {
-                  const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
-                  const categorizer = new BankTransactionCategorizer();
-                  
-                  const categorized = categorizer.addOneCategoryToTransactions(transactions, categories);
-    
-                  res.json(categorized).end();
-                });
-            })
-            .catch((err) => {
-              res.status(500).json({message: err}).end();
-            });
+      // Save the header to the database.
+      await this._saveFileHeader(firstFilePath);
+
+      try {
+        // TODO specify the charset, we do not know if it's UTF-8
+        const transactions = await trxReader.readFile(firstFilePath);
+        // Delete file after done with it
+        fs.unlink(firstFilePath, (err) => {
+          if (err) {
+            console.error(`Error deleting file [${firstFilePath}]: ${err}`);
+          }
         });
-      
+  
+        const categories = await DatabaseService.listAllCategories();
+        const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
+        const categorized = 
+          new BankTransactionCategorizer()
+          .addOneCategoryToTransactions(transactions, categories);
+
+        res.json(categorized).end();
+      } catch(err) {
+        res.status(500).json({message: err}).end();
+      }
     }
   }
 
-  _saveFileHeader(filePath) {
-    return new BankFileHeaderReader().readFileHeader(filePath)
-      .then(header => {
-        // Save header to database
-        // console.log(JSON.stringify(header));
-        const DatabaseService = require('../database/DatabaseService');
-        return DatabaseService.insert('uploadedHeaders', header);
-      });
+  async _saveFileHeader(filePath) {
+    const header = await headerReader.readFileHeader(filePath);
+    // Save header to database
+    console.log('Saving header: ', JSON.stringify(header));
+    // Insert the header.
+    const returnValue = await DatabaseService.insertHeader(header);
+    return returnValue;
   }
 
 }

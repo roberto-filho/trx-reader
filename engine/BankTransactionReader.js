@@ -69,9 +69,18 @@ class BankTransactionReader {
       index: transactionRow[0],
       date: transactionRow[1],
       description: transactionRow[2],
-      value: transactionRow[3],
+      value: this._moneyToNumber(transactionRow[3]),
       balance: transactionRow[4]
     };
+  }
+
+  _moneyToNumber(moneyString) {
+    const number = (moneyString || '')
+      .replace('.', '')
+      .match(/\d|\.|\,|\-/gm)
+      .join('')
+      .replace(',', '.');
+    return new Number(number);
   }
 
   /**
