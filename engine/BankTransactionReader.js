@@ -74,6 +74,11 @@ class BankTransactionReader {
     };
   }
 
+  /**
+   * Parses money values in string format to numbers. Takes into consideration
+   * negative values.
+   * @param {string} moneyString the string to be parsed into number. Ex: "R$ 1.923,98"
+   */
   _moneyToNumber(moneyString) {
     const number = (moneyString || '')
       .replace('.', '')

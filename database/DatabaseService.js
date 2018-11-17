@@ -1,9 +1,8 @@
 const {databaseUrl, database} = require('../Application').getCurrentSettings();
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
-const MongoClient = require('mongodb').MongoClient;
-
-// const promiseFinally = require('promise.prototype.finally');
-// promiseFinally.shim();
+// import { MongoClient } from 'mongodb';
 
 /**
  * Manages database operations.
@@ -168,22 +167,25 @@ class DatabaseService {
    * @param {object} objectsToInsert the object or array of objects to insert in the collection
    * @return {object} the inserted object
    */
-  static insert(collectionName, objectsToInsert) {
+  static async insert(collectionName, objectsToInsert) {
     // Sanity checks
     if (typeof collectionName !== 'string') {
       throw Error(`Argument collectionName should be string. Actual: '${collectionName}'`);
     }
 
     let connection;
-    return this.connect()
-        .then(client => connection = client)
-        .then(client => this.connectToDb(client))
-        .then(db => db.collection(collectionName))
-        .then(databaseCollection => {
-          const databaseResult = databaseCollection.insert(objectsToInsert);
-          return databaseResult.then(connection.close());
-        })
-        .catch((err) => connection.close());
+    try {
+      
+      connection = await this.connect();
+      const db = await this.connectToDb(connection);
+      const databaseCollection = await db.collection(collectionName);
+      
+      const insertionResult = await databaseCollection.insert(objectsToInsert);
+      return insertionResult;
+
+    } finally {
+      await connection.close();
+    }
   }
 
   /**
@@ -217,10 +219,12 @@ class DatabaseService {
    * Inserts a header into the database. No validation is done.
    * @param {object} header the header object to be inserted.
    */
-  static insertHeader(header) {
+  static async insertHeader(header) {
     // Add createdAt date
     header.createdAt = new Date();
-    return this.insert('uploadedHeaders', header);
+    const insertionResult = await this.insert('uploadedHeaders', header);
+    // console.log(JSON.stringify(insertionResult));
+    return insertionResult;
   }
 }
 

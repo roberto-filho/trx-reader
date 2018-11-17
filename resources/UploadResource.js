@@ -2,6 +2,7 @@ const fs = require('fs');
 const BankFileHeaderReader = require('../engine/BankFileHeaderReader');
 const DatabaseService = require('../database/DatabaseService');
 const headerReader = new BankFileHeaderReader();
+const BankTransactionReader = require('../engine/BankTransactionReader');
 
 module.exports = class BankResource {
 
@@ -18,13 +19,11 @@ module.exports = class BankResource {
    */
   async uploadFile(req, res) {
 
-    const BankTransactionReader = require('../engine/BankTransactionReader');
-
     const trxReader = new BankTransactionReader();
 
     if (Object.keys(req.files).length === 0) {
       // There is no file upload, throw error
-      res.status(422).json({message: 'No file to upload.'}).end();
+      res.status(422).json({message: 'No file for upload.'}).end();
     } else {
       // Parse only first file
       const firstFileKey = Object.keys(req.files)[0];
