@@ -128,6 +128,14 @@ class DatabaseService {
   }
 
   /**
+   * Lists all uploaded headers.
+   * @return {array}
+   */
+  static listAllUploadedHeaders() {
+    return this.listAll('uploadedHeaders');
+  }
+
+  /**
    * Deletes all objects in a collection.
    * @param {string} collectionName the collection to have its elements removed.
    * @return {object}
@@ -175,7 +183,7 @@ class DatabaseService {
 
     let connection;
     try {
-      
+
       connection = await this.connect();
       const db = await this.connectToDb(connection);
       const databaseCollection = await db.collection(collectionName);
