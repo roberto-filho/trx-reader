@@ -1,12 +1,14 @@
 const UploadResource = require('../resources/UploadResource');
 const CategoriesResource = require('../resources/CategoriesResource');
 const UploadedHeadersResource = require('../resources/UploadedHeadersResource');
+const TransactionsResource = require('../resources/TransactionsResource');
 
 function registerResourcesToApp(app) {
   const resources = [];
   resources.push(new UploadResource());
   resources.push(new CategoriesResource());
   resources.push(new UploadedHeadersResource());
+  resources.push(new TransactionsResource());
 
   // Call the register paths
   resources.forEach(resource => {

@@ -2,7 +2,7 @@ const BankTransactionReader = require('./BankTransactionReader');
 const BankTransactionCategorizer = require('./BankTransactionCategorizer');
 const DatabaseService = require('../database/DatabaseService');
 
-const UploadResource = require('../resources/UploadResource');
+const BankFileProcessor = require('./BankFileProcessor');
 
 const reader = new BankTransactionReader();
 
@@ -11,31 +11,25 @@ module.exports = class BankTransactionProcessor {
     
   }
 
-  processFile(file) {
-    return new UploadResource()._saveFileHeader(file)
-      .then(insertionResult => insertionResult.ops[0])
-      .then(insertedHeader => {
-        return reader.readFile(file).then(transactionObjects => {
-          return DatabaseService.listAllCategories().then(categories => {
-            return this._saveTransactions(transactionObjects, insertedHeader)
-              .then(savedTrxs => {
+  async processFile(file) {
+    const insertedHeader = await BankFileProcessor._saveFileHeader(file);
+    const transactionObjects = await reader.readFile(file);
+    const categories = await DatabaseService.listAllCategories();
+    
+    const savedTrxs = await this._saveTransactions(transactionObjects, insertedHeader);
+    
+    // Check if all transactions have categories
+    // All that don't fall into a category should have one created
+    const categorizer = new BankTransactionCategorizer();
 
-                // Check if all transactions have categories
-                // All that don't fall into a category should have one created
-                const categorizer = new BankTransactionCategorizer();
+    // For each transaction, check for user categories
+    // If there is one, the associate and we're done.
 
-                // For each transaction, check for user categories
-                // If there is one, the associate and we're done.
-
-                // If one is not found, check for default category.
-              
-                const categorized = categorizer.addManyCategoriesToTransactions(transactionObjects, categories);
-              
-                return categorized;
-              });
-          });
-        });
-      });
+    // If one is not found, check for default category.
+  
+    const categorized = categorizer.addManyCategoriesToTransactions(transactionObjects, categories);
+  
+    return categorized;
   }
 
   _saveTransactions(transactions, header) {

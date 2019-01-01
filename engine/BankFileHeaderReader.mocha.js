@@ -35,20 +35,3 @@ describe('BankFileHeaderReader', function () {
   });
 
 });
-
-describe('UploadResource', function () {
-
-  describe('#_saveFileHeader', function () {
-    const fileHeaderPromise = new UploadResource()._saveFileHeader(TEST_EXTRATO_FILE_PATH);
-
-    it('should save a file header', async () => {
-      return expect(fileHeaderPromise).to.eventually.be.fulfilled;
-    });
-    
-    after(async () => {
-      // Clear the database of file headers
-      await DatabaseService.deleteAllFileHeaders();
-    });
-  });
-
-})

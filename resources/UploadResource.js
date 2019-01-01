@@ -1,8 +1,7 @@
 const fs = require('fs');
-const BankFileHeaderReader = require('../engine/BankFileHeaderReader');
 const DatabaseService = require('../database/DatabaseService');
-const headerReader = new BankFileHeaderReader();
-const BankTransactionReader = require('../engine/BankTransactionReader');
+
+const BankFileProcessor = require('../engine/BankFileProcessor');
 
 module.exports = class BankResource {
 
@@ -19,8 +18,6 @@ module.exports = class BankResource {
    */
   async uploadFile(req, res) {
 
-    const trxReader = new BankTransactionReader();
-
     if (Object.keys(req.files).length === 0) {
       // There is no file upload, throw error
       res.status(422).json({message: 'No file for upload.'}).end();
@@ -32,12 +29,10 @@ module.exports = class BankResource {
 
       console.log(`Handling request file: ${firstFilePath}`);
 
-      // Save the header to the database.
-      await this._saveFileHeader(firstFilePath);
-
       try {
         // TODO specify the charset, we do not know if it's UTF-8
-        const transactions = await trxReader.readFile(firstFilePath);
+        const transactions = await BankFileProcessor.processFile(firstFilePath);
+        
         // Delete file after done with it
         fs.unlink(firstFilePath, (err) => {
           if (err) {
@@ -56,15 +51,6 @@ module.exports = class BankResource {
         res.status(500).json({message: err}).end();
       }
     }
-  }
-
-  async _saveFileHeader(filePath) {
-    const header = await headerReader.readFileHeader(filePath);
-    // Save header to database
-    console.log('Saving header: ', JSON.stringify(header));
-    // Insert the header.
-    const returnValue = await DatabaseService.insertHeader(header);
-    return returnValue;
   }
 
 }

@@ -1,5 +1,6 @@
 const {databaseUrl, database} = require('../Application').getCurrentSettings();
 const mongodb = require('mongodb');
+const ObjectId = mongodb.ObjectId;
 const MongoClient = mongodb.MongoClient;
 
 // import { MongoClient } from 'mongodb';
@@ -136,6 +137,14 @@ class DatabaseService {
   }
 
   /**
+   * Lists all uploaded headers.
+   * @return {array}
+   */
+  static listAllTransactions() {
+    return this.listAll('transactions');
+  }
+
+  /**
    * Deletes all objects in a collection.
    * @param {string} collectionName the collection to have its elements removed.
    * @return {object}
@@ -233,6 +242,64 @@ class DatabaseService {
     const insertionResult = await this.insert('uploadedHeaders', header);
     // console.log(JSON.stringify(insertionResult));
     return insertionResult;
+  }
+
+  static async getHeader(headerId) {
+    let connection = await this.connect();
+    let collection = await this.connectToDb(connection)
+        .then(db => db.collection('uploadedHeaders'));
+
+    const cursor = await collection.findOne({
+      _id: ObjectId(headerId)
+    });
+
+    const result = await cursor;
+
+    await connection.close();
+
+    return result;
+  }
+
+  static async listTransactionsByHeader(headerId, options) {
+    let connection = await this.connect();
+    let collection = await this.connectToDb(connection)
+        .then(db => db.collection('transactions'));
+
+    let query = collection.find({
+      uploadedHeaders_id: headerId
+    });
+
+    if ((options.select || options.deselect) 
+          && (Array.isArray(options.select) || Array.isArray(options.deselect))) {
+      query = this._applyProjection(query, options.select, options.deselect);
+    }
+
+    const cursor = await query;
+
+    const result = await cursor.toArray();
+
+    await connection.close();
+
+    return result;
+  }
+
+  /**
+   * Modifies the query to select or deselect property upon
+   * querying documents.
+   * @param {object} query the mongodb query object.
+   * @param {array} projection the array of fields to be selected.
+   * @param {array} propertiesToIgnore the array of fields to ignore.
+   */
+  static _applyProjection(query, projection, propertiesToIgnore) {
+    const projectObj = {};
+    (projection||[]).forEach(property => {
+      projectObj[property] = 1;
+    });
+    (propertiesToIgnore||[]).forEach(property => {
+      projectObj[property] = 0;
+    });
+
+    return query.project(projectObj);
   }
 }
 

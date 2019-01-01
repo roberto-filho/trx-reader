@@ -85,7 +85,7 @@ class BankTransactionReader {
       .match(/\d|\.|\,|\-/gm)
       .join('')
       .replace(',', '.');
-    return new Number(number);
+    return Number(number);
   }
 
   /**
