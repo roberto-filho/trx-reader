@@ -2,6 +2,7 @@ const fs = require('fs');
 const DatabaseService = require('../database/DatabaseService');
 
 const BankFileProcessor = require('../engine/BankFileProcessor');
+const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
 
 module.exports = class BankResource {
 
@@ -39,9 +40,8 @@ module.exports = class BankResource {
             console.error(`Error deleting file [${firstFilePath}]: ${err}`);
           }
         });
-  
+
         const categories = await DatabaseService.listAllCategories();
-        const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
         const categorized = 
           new BankTransactionCategorizer()
           .addOneCategoryToTransactions(transactions, categories);

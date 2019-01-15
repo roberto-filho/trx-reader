@@ -28,7 +28,7 @@ const readDefaultCategories = () => {
 
 describe('BankTransactionCategorizer', () => {
   
-  describe('#categorize', () => {
+  describe('#sortIntoCategories', () => {
     const categories = JSON.parse(require('fs').readFileSync('test/test-categories.json', 'utf8'));
     
     const categorizer = new Categorizer();
@@ -38,17 +38,19 @@ describe('BankTransactionCategorizer', () => {
         [mockTransactionRowWithBarDescription],
         categories
       );
+
+      context('with no matches', () => {
+        it('should return an empty array with no categories', () => {
+          return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;
+        });
+      });
       
       const categorizedTransaction = categorizer.sortIntoCategories(
         [mockTransactionRowWithBarAndRestauranteInDescription],
         categories
       );
       
-      it('should return an empty array with no categories', () => {
-        return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;
-      });
-      
-      context('with one category', function () {
+      context('with matches', function () {
         it('should return an array with one category', () => {
           return expect(categorizedTransaction).to.be.an('array').with.lengthOf(1);
         });
