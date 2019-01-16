@@ -34,23 +34,31 @@ describe('BankTransactionCategorizer', () => {
     const categorizer = new Categorizer();
     
     describe('when categorizing a single transation', () => {
-      const emptyCategorizedTransaction = categorizer.sortIntoCategories(
-        [mockTransactionRowWithBarDescription],
-        categories
-      );
-
       context('with no matches', () => {
-        it('should return an empty array with no categories', () => {
-          return expect(emptyCategorizedTransaction).to.be.an('array').that.is.empty;
+        const uncategorizedCategory = categorizer.sortIntoCategories(
+          [mockTransactionRowWithBarDescription],
+          categories
+        );
+
+        it('should return an array with \'uncategorized\'', () => {
+          const expectedObject = {
+            id: 'x',
+            description: 'Uncategorized',
+            transactions: [mockTransactionRowWithBarDescription]
+          };
+          return expect(uncategorizedCategory).to.have.deep.members([expectedObject]);
         });
+        it('should return an array with one element', async () => {
+          return expect(uncategorizedCategory).to.be.an('array').with.length.of(1);
+        })
       });
       
-      const categorizedTransaction = categorizer.sortIntoCategories(
-        [mockTransactionRowWithBarAndRestauranteInDescription],
-        categories
-      );
-      
       context('with matches', function () {
+        const categorizedTransaction = categorizer.sortIntoCategories(
+          [mockTransactionRowWithBarAndRestauranteInDescription],
+          categories
+        );
+        
         it('should return an array with one category', () => {
           return expect(categorizedTransaction).to.be.an('array').with.lengthOf(1);
         });

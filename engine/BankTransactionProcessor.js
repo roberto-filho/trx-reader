@@ -12,11 +12,16 @@ module.exports = class BankTransactionProcessor {
   }
 
   async processFile(file) {
-    const insertedHeader = await BankFileProcessor._saveFileHeader(file);
-    const transactionObjects = await reader.readFile(file);
     const categories = await DatabaseService.listAllCategories();
     
-    const savedTrxs = await this._saveTransactions(transactionObjects, insertedHeader);
+    const savedTrxs = await BankFileProcessor.processFile(file);
+
+    // TODO Delete file after done with it
+    // fs.unlink(firstFilePath, (err) => {
+    //   if (err) {
+    //     console.error(`Error deleting file [${firstFilePath}]: ${err}`);
+    //   }
+    // });
     
     // Check if all transactions have categories
     // All that don't fall into a category should have one created
@@ -27,7 +32,7 @@ module.exports = class BankTransactionProcessor {
 
     // If one is not found, check for default category.
   
-    const categorized = categorizer.addManyCategoriesToTransactions(transactionObjects, categories);
+    const categorized = categorizer.sortIntoCategories(savedTrxs, categories);
   
     return categorized;
   }

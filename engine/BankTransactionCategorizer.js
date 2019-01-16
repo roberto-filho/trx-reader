@@ -43,21 +43,23 @@ class BankTransactionCategorizer {
     const categoryMap = {};
 
     transactions.forEach(trx => {
-      const trxCategory = this._categorizeOne(trx, categories);
-      if (Object.keys(trxCategory).length !== 0) {
-        // Check if it exists
-        const existingCategory = categoryMap[trxCategory.id];
+      const category = this._categorizeOne(trx, categories);
+      const hasCategory = Object.keys(category).length !== 0;
 
-        if (existingCategory) {
-          // If one or more transactions already exist, just push
-          existingCategory.transactions.push(trx);
-        } else {
-          // If not, create it
-          categoryMap[trxCategory.id] = {
-            ...trxCategory,
-            transactions: [trx]
-          };
-        }
+      const trxCategory = hasCategory ? category : UNCATEGORIZED_CATEGORY;
+
+      // Check if it exists
+      const existingCategory = categoryMap[trxCategory.id];
+
+      if (existingCategory) {
+        // If one or more transactions already exist, just push
+        existingCategory.transactions.push(trx);
+      } else {
+        // If not, create it
+        categoryMap[trxCategory.id] = {
+          ...trxCategory,
+          transactions: [trx]
+        };
       }
     });
 
