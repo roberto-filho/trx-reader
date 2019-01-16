@@ -9,7 +9,16 @@ module.exports = class BankResource {
   registerPaths(express) {
     // We need to bind this function to allow it to use the other methods in this class
     // using "this"
-    express.post('/api/bank/upload', this.uploadFile.bind(this));
+    express.post('/api/bank/upload', this.uploadNoSort.bind(this));
+    express.post('/api/bank/upload-and-sort', this.uploadAndSort.bind(this));
+  }
+
+  uploadAndSort(req, res) {
+    return this.uploadFile(req, res, true);
+  }
+
+  uploadNoSort(req, res) {
+    return this.uploadFile(req, res);
   }
 
   /**
@@ -17,7 +26,7 @@ module.exports = class BankResource {
    * @param {object} request the request
    * @param {object} response the response
    */
-  async uploadFile(req, res) {
+  async uploadFile(req, res, shouldSort = false) {
 
     if (Object.keys(req.files).length === 0) {
       // There is no file upload, throw error
@@ -42,9 +51,12 @@ module.exports = class BankResource {
         });
 
         const categories = await DatabaseService.listAllCategories();
-        const categorized = 
-          new BankTransactionCategorizer()
-          .addOneCategoryToTransactions(transactions, categories);
+
+        const categorizer = new BankTransactionCategorizer();
+
+        const categorized = shouldSort
+          ? categorizer.sortIntoCategories(transactions, categories)
+          : categorizer.addOneCategoryToTransactions(transactions, categories);
 
         res.json(categorized).end();
       } catch(err) {

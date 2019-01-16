@@ -25,8 +25,6 @@ module.exports = class ResourceConfigurator {
    */
   static configureResources(app, configurator) {
     // Register busboy for paths
-    configurator.addUploadPath('/api/bank/upload');
-    configurator.addUploadPath('/api/bank/categorize');
     configurator.configure(app);
 
     registerResourcesToApp(app);
