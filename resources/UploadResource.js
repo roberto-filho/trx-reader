@@ -60,7 +60,8 @@ module.exports = class BankResource {
 
         res.json(categorized).end();
       } catch(err) {
-        res.status(500).json({message: err}).end();
+        console.error(err);
+        res.status(500).json({message: err && err.message}).end();
       }
     }
   }

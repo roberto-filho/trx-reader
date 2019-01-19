@@ -201,7 +201,8 @@ class DatabaseService {
       return insertionResult;
 
     } finally {
-      await connection.close();
+      if (connection) // Connection may have failed.
+        await connection.close();
     }
   }
 
