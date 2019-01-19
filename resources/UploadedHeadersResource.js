@@ -2,6 +2,8 @@ const fs = require('fs');
 
 const DatabaseService = require('../database/DatabaseService');
 
+const BankTransactionCategorizer = require('../engine/BankTransactionCategorizer');
+
 module.exports = class UploadedHeadersResource {
 
   constructor () {
@@ -15,6 +17,7 @@ module.exports = class UploadedHeadersResource {
     // express.delete('/api/bank/categories', this.deleteHeaders.bind(this));
     express.get('/api/bank/uploaded-headers/:id', this.get.bind(this));
     express.get('/api/bank/uploaded-headers/:id/transactions', this.getTransactions.bind(this));
+    express.get('/api/bank/uploaded-headers/:id/transactions/sort-into-categories', this.sortTransactionsIntoCategories.bind(this));
   }
 
   async list(req, res) {
@@ -53,6 +56,23 @@ module.exports = class UploadedHeadersResource {
       });
       res.status(200).json(transactions);
     } catch(err) {
+      res.status(500).json(err).end();
+    }
+  }
+
+  async sortTransactionsIntoCategories(req, res) {
+    const {id} = req.params;
+    try {
+      const transactions = await DatabaseService.listTransactionsByHeader(id, {
+        deselect: ['uploadedHeaders_id'],
+      });
+
+      const categories = await DatabaseService.listAllCategories();
+
+      const categorizer = new BankTransactionCategorizer();
+
+      res.status(200).json(categorizer.sortIntoCategories(transactions, categories));
+    } catch (error) {
       res.status(500).json(err).end();
     }
   }
