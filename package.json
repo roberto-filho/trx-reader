@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/roberto-filho/dotfiles.git"
+    "url": "git+https://github.com/roberto-filho/trx-reader.git"
   },
   "author": "Roberto Filho <roberto.w.filho@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/roberto-filho/dotfiles/issues"
+    "url": "https://github.com/roberto-filho/trx-reader/issues"
   },
-  "homepage": "https://github.com/roberto-filho/dotfiles#readme",
+  "homepage": "https://github.com/roberto-filho/trx-reader#readme",
   "dependencies": {
     "cors": "~2.8.4",
     "csv-reader": "~1.0.1",
